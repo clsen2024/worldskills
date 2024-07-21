@@ -1,5 +1,5 @@
 **/node_modules/
-lambda_edge.zip
+*.zip
 
 # Local .terraform directories
 **/.terraform/*
