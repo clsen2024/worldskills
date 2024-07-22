@@ -2,7 +2,6 @@ resource "aws_instance" "test" {
   ami                         = data.aws_ami.amazon-linux-2023.id
   associate_public_ip_address = true
   instance_type               = "t2.micro"
-  key_name                    = aws_key_pair.wsi.key_name
 
   tags = {
     Name = "wsi-test"
@@ -27,9 +26,4 @@ data "aws_ami" "amazon-linux-2023" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-}
-
-resource "aws_key_pair" "wsi" {
-  key_name   = "wsi"
-  public_key = file("~/.ssh/id_rsa.pub")
 }

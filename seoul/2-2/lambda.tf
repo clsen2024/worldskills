@@ -27,16 +27,23 @@ resource "aws_iam_policy" "preserve" {
       {
         Action = [
           "ec2:DescribeInstances",
+          "ec2:DescribeSecurityGroups",
           "ec2:AuthorizeSecurityGroupIngress",
           "ec2:AuthorizeSecurityGroupEgress",
           "ec2:RevokeSecurityGroupIngress",
-          "ec2:RevokeSecurityGroupEgress"
+          "ec2:RevokeSecurityGroupEgress",
+          "config:PutEvaluations"
         ]
         Effect   = "Allow"
         Resource = "*"
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "logging" {
+  role       = aws_iam_role.preserve.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "preserve" {
@@ -57,6 +64,12 @@ resource "aws_lambda_function" "preserve" {
   handler       = "main.lambda_handler"
 
   source_code_hash = data.archive_file.preserve.output_base64sha256
+  timeout = 30
+  environment {
+    variables = {
+      ACCOUNT_ID = local.account_id
+    }
+  }
 
   runtime = "python3.12"
 }

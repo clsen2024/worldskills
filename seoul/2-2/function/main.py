@@ -1,6 +1,7 @@
 import boto3
 import botocore
 import json
+import os
 
 APPLICABLE_RESOURCES = ["AWS::EC2::SecurityGroup"]
 
@@ -48,15 +49,16 @@ def evaluate_compliance(configuration_item):
         }
 
     sg_ingress = response["SecurityGroups"][0]["IpPermissions"]
+    account_id = os.environ["ACCOUNT_ID"]
     REQUIRED_INGRESS = [
-        {"IpProtocol" : "tcp","FromPort" : 22,"ToPort" : 22,"UserIdGroupPairs" : [],"IpRanges" : [{"CidrIp" : "118.221.173.107/32"}],"PrefixListIds" : [],"Ipv6Ranges" : []},
-        {"IpProtocol" : "tcp","FromPort" : 80,"ToPort" : 80,"UserIdGroupPairs" : [{"GroupId": group_id, "UserId": "828680151668"}],"IpRanges" : [],"Ipv6Ranges" : [],"PrefixListIds" : []},
-        {"IpProtocol" : "tcp","FromPort" : 3306,"ToPort" : 3306,"UserIdGroupPairs" : [{"GroupId": group_id, "UserId": "828680151668"}],"IpRanges" : [],"Ipv6Ranges" : [],"PrefixListIds" : []}
+        {"IpProtocol":"tcp", "FromPort":22, "ToPort":22, "UserIdGroupPairs":[], "IpRanges":[{"CidrIp":"118.221.173.107/32"}], "PrefixListIds":[], "Ipv6Ranges":[]},
+        {"IpProtocol":"tcp", "FromPort":80, "ToPort":80, "UserIdGroupPairs":[{"GroupId":group_id, "UserId":account_id}], "IpRanges":[], "Ipv6Ranges":[], "PrefixListIds":[]},
+        {"IpProtocol":"tcp", "FromPort":3306, "ToPort":3306, "UserIdGroupPairs":[{"GroupId":group_id, "UserId":account_id}], "IpRanges":[], "Ipv6Ranges":[], "PrefixListIds":[]}
     ]
     REQUIRED_EGRESS = [
-        {"IpProtocol" : "tcp","FromPort" : 22,"ToPort" : 22,"UserIdGroupPairs" : [],"IpRanges" : [{"CidrIp" : "0.0.0.0/0"}],"PrefixListIds" : [],"Ipv6Ranges" : []},
-        {"IpProtocol" : "tcp","FromPort" : 80,"ToPort" : 80,"UserIdGroupPairs" : [],"IpRanges" : [{"CidrIp" : "0.0.0.0/0"}],"PrefixListIds" : [],"Ipv6Ranges" : []}, 
-        {"IpProtocol" : "tcp","FromPort" : 443,"ToPort" : 443,"UserIdGroupPairs" : [],"IpRanges" : [{"CidrIp" : "0.0.0.0/0"}],"PrefixListIds" : [],"Ipv6Ranges" : []}
+        {"IpProtocol":"tcp", "FromPort":22, "ToPort":22, "UserIdGroupPairs":[], "IpRanges":[{"CidrIp":"0.0.0.0/0"}], "PrefixListIds":[], "Ipv6Ranges":[]},
+        {"IpProtocol":"tcp", "FromPort":80, "ToPort":80, "UserIdGroupPairs":[], "IpRanges":[{"CidrIp":"0.0.0.0/0"}], "PrefixListIds":[], "Ipv6Ranges":[]}, 
+        {"IpProtocol":"tcp", "FromPort":443, "ToPort":443, "UserIdGroupPairs":[], "IpRanges":[{"CidrIp":"0.0.0.0/0"}], "PrefixListIds":[], "Ipv6Ranges":[]}
     ]
     authorize_ingress = [item for item in REQUIRED_INGRESS if item not in sg_ingress]
     revoke_ingress = [item for item in sg_ingress if item not in REQUIRED_INGRESS]
@@ -121,7 +123,6 @@ def evaluate_compliance(configuration_item):
     }
 
 def lambda_handler(event, context):
-    print(event)
     invoking_event = json.loads(event['invokingEvent'])
     configuration_item = invoking_event["configurationItem"]
 
