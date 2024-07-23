@@ -1,5 +1,5 @@
 resource "aws_instance" "bastion" {
-  ami                         = data.aws_ami.amazon-linux-2023.id
+  ami                         = data.aws_ami.al2023.id
   associate_public_ip_address = true
   instance_type               = "t3.small"
   subnet_id                   = aws_subnet.public-a.id
@@ -13,13 +13,33 @@ resource "aws_instance" "bastion" {
   }
 }
 
-data "aws_ami" "amazon-linux-2023" {
+data "aws_ami" "al2023" {
   most_recent      = true
   owners           = ["amazon"]
  
   filter {
     name   = "name"
     values = ["al2023-ami-2023.*-x86_64"]
+  }
+ 
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+ 
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+data "aws_ami" "ecs" {
+  most_recent      = true
+  owners           = ["amazon"]
+ 
+  filter {
+    name   = "name"
+    values = ["al2023-ami-ecs-hvm-2023.*-x86_64"]
   }
  
   filter {
@@ -90,7 +110,7 @@ resource "aws_iam_instance_profile" "admin" {
 
 resource "aws_launch_template" "ecs" {
   name                   = "ecs_instance"
-  image_id               = data.aws_ami.amazon-linux-2023.id
+  image_id               = data.aws_ami.ecs.id
   instance_type          = "t3.medium"
   user_data              = base64encode(data.template_file.user_data.rendered)
   vpc_security_group_ids = [aws_security_group.ec2.id]
@@ -110,8 +130,8 @@ resource "aws_security_group" "ec2" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = 80
-    to_port         = 80
+    from_port       = 32768
+    to_port         = 65535
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
@@ -194,5 +214,9 @@ resource "aws_autoscaling_group" "ecs" {
     key                 = "Name"
     value               = "ecs_instance"
     propagate_at_launch = true
+  }
+
+  lifecycle {
+    ignore_changes = [tag]
   }
 }

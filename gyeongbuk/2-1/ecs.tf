@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_ecs_capacity_provider" "ec2" {
-  name  = "ecs_ec2_capacity_provider"
+  name  = "ec2_capacity_provider"
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.ecs.arn
@@ -56,17 +56,16 @@ resource "aws_ecs_task_definition" "main" {
       portMappings = [
         {
           containerPort = 80
-          hostPort      = 80
+          hostPort      = 0
           protocol      = "tcp"
         }
       ]
       logConfiguration = {
         logDriver = "awslogs",
         options   = {
-          "awslogs-group"         = "/ecs/wsi-td",
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs.name,
           "awslogs-region"        = "ap-northeast-2",
-          "awslogs-stream-prefix" = "ecs",
-          "awslogs-create-group"  = "true"
+          "awslogs-stream-prefix" = "ecs"
         }
       }
     }
@@ -75,13 +74,15 @@ resource "aws_ecs_task_definition" "main" {
   cpu = 512
   memory = 1024
   network_mode = "bridge"
+}
 
-  depends_on = [null_resource.ecr_push]
+resource "aws_cloudwatch_log_group" "ecs" {
+  name = "/ecs/wsi-td"
+  retention_in_days = 0
 }
 
 resource "aws_ecs_service" "main" {
   name                               = "wsi-ecs-s"
-  iam_role                           = aws_iam_service_linked_role.ecs.arn
   cluster                            = aws_ecs_cluster.main.id
   task_definition                    = aws_ecs_task_definition.main.arn
   desired_count                      = 2
@@ -103,12 +104,10 @@ resource "aws_ecs_service" "main" {
   }
 
   lifecycle {
-    ignore_changes = [desired_count]
+    ignore_changes = [desired_count, task_definition]
   }
-}
 
-resource "aws_iam_service_linked_role" "ecs" {
-  aws_service_name = "ecs.amazonaws.com"
+  depends_on = [null_resource.ecr_push]
 }
 
 resource "aws_alb" "main" {
