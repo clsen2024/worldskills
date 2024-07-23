@@ -1,5 +1,5 @@
 resource "aws_vpc" "main" {
-  cidr_block           = "10.150.0.0/16"
+  cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
 
   tags = {
@@ -9,43 +9,43 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "public-a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.150.10.0/24"
+  cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "ap-northeast-2a"
 
   tags = {
-    Name = "wsi-public-a"
+    Name = "wsi-public-subnet-a"
   }
 }
 
 resource "aws_subnet" "public-b" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.150.11.0/24"
+  cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "ap-northeast-2b"
 
   tags = {
-    Name = "wsi-public-b"
+    Name = "wsi-public-subnet-b"
   }
 }
 
 resource "aws_subnet" "private-a" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.150.0.0/24"
+  cidr_block        = "10.0.2.0/24"
   availability_zone = "ap-northeast-2a"
 
   tags = {
-    Name = "wsi-app-a"
+    Name = "wsi-private-subnet-a"
   }
 }
 
 resource "aws_subnet" "private-b" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.150.1.0/24"
+  cidr_block        = "10.0.3.0/24"
   availability_zone = "ap-northeast-2b"
 
   tags = {
-    Name = "wsi-app-b"
+    Name = "wsi-private-subnet-b"
   }
 }
 
@@ -104,7 +104,7 @@ resource "aws_route_table" "public-rt" {
   }
 
   tags = {
-    Name = "wsi-public-rt"
+    Name = "wsi-public-rtb"
   }
 }
 
@@ -117,7 +117,7 @@ resource "aws_route_table" "private-a-rt" {
   }
 
   tags = {
-    Name = "wsi-app-a-rt"
+    Name = "wsi-private-rtb-a"
   }
 }
 
@@ -130,7 +130,7 @@ resource "aws_route_table" "private-b-rt" {
   }
 
   tags = {
-    Name = "wsi-app-b-rt"
+    Name = "wsi-private-rtb-b"
   }
 }
 

@@ -80,14 +80,14 @@ resource "aws_codebuild_project" "main" {
     image                       = "aws/codebuild/amazonlinux2-x86_64-standard:5.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
-    privileged_mode = true
+    privileged_mode             = true
 
     environment_variable {
-      name = "AWS_ACCOUNT_ID"
+      name  = "AWS_ACCOUNT_ID"
       value = local.account_id
     }
     environment_variable {
-      name = "REPOSITORY_NAME"
+      name  = "REPOSITORY_NAME"
       value = aws_ecr_repository.main.name
     }
   }
@@ -100,16 +100,16 @@ resource "aws_codebuild_project" "main" {
   }
 
   source {
-    type = "CODECOMMIT"
-    location = aws_codecommit_repository.main.clone_url_http
+    type      = "CODECOMMIT"
+    location  = aws_codecommit_repository.main.clone_url_http
     buildspec = file("./buildspec.yml")
   }
 }
 
 resource "aws_codepipeline" "main" {
-  name     = "wsi-pipeline"
-  role_arn = aws_iam_role.codepipeline.arn
-  pipeline_type = "V2"
+  name           = "wsi-pipeline"
+  role_arn       = aws_iam_role.codepipeline.arn
+  pipeline_type  = "V2"
   execution_mode = "QUEUED"
 
   artifact_store {
@@ -168,14 +168,15 @@ resource "aws_codepipeline" "main" {
       configuration = {
         ClusterName = aws_ecs_cluster.main.name
         ServiceName = aws_ecs_service.main.name
-        FileName = "imagedefinitions.json"
+        FileName    = "imagedefinitions.json"
       }
     }
   }
 }
 
 resource "aws_s3_bucket" "codepipeline" {
-  bucket = "codepipeline-ap-northeast-2-${local.account_id}"
+  bucket        = "codepipeline-ap-northeast-2-${local.account_id}"
+  force_destroy = true
 }
 
 data "aws_iam_policy_document" "codepipeline_assume" {

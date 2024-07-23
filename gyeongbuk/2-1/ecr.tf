@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "main" {
-  name = "wsi"
+  name         = "wsi"
   force_delete = true
 }
 
@@ -13,6 +13,6 @@ resource "null_resource" "ecr_push" {
   }
 
   provisioner "local-exec" {
-    command = "docker push ${aws_ecr_repository.main.repository_url}:1"      
+    command = "docker push ${aws_ecr_repository.main.repository_url}:1"
   }
 }

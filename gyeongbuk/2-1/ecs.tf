@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "main" {
 }
 
 resource "aws_ecs_capacity_provider" "ec2" {
-  name  = "ec2_capacity_provider"
+  name = "ec2_capacity_provider"
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.ecs.arn
@@ -50,9 +50,9 @@ resource "aws_ecs_task_definition" "main" {
 
   container_definitions = jsonencode([
     {
-      name         = "nginx"
-      image        = "${aws_ecr_repository.main.repository_url}:1"
-      essential    = true
+      name      = "nginx"
+      image     = "${aws_ecr_repository.main.repository_url}:1"
+      essential = true
       portMappings = [
         {
           containerPort = 80
@@ -62,7 +62,7 @@ resource "aws_ecs_task_definition" "main" {
       ]
       logConfiguration = {
         logDriver = "awslogs",
-        options   = {
+        options = {
           "awslogs-group"         = aws_cloudwatch_log_group.ecs.name,
           "awslogs-region"        = "ap-northeast-2",
           "awslogs-stream-prefix" = "ecs"
@@ -71,21 +71,21 @@ resource "aws_ecs_task_definition" "main" {
     }
   ])
 
-  cpu = 512
-  memory = 1024
+  cpu          = 512
+  memory       = 1024
   network_mode = "bridge"
 }
 
 resource "aws_cloudwatch_log_group" "ecs" {
-  name = "/ecs/wsi-td"
+  name              = "/ecs/wsi-td"
   retention_in_days = 0
 }
 
 resource "aws_ecs_service" "main" {
-  name                               = "wsi-ecs-s"
-  cluster                            = aws_ecs_cluster.main.id
-  task_definition                    = aws_ecs_task_definition.main.arn
-  desired_count                      = 2
+  name            = "wsi-ecs-s"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.main.arn
+  desired_count   = 2
 
   load_balancer {
     target_group_arn = aws_alb_target_group.alb_http.arn
@@ -97,7 +97,7 @@ resource "aws_ecs_service" "main" {
     type  = "spread"
     field = "attribute:ecs.availability-zone"
   }
-  
+
   ordered_placement_strategy {
     type  = "binpack"
     field = "memory"
@@ -140,11 +140,11 @@ resource "aws_security_group" "alb" {
 
 resource "aws_alb_listener" "alb_http" {
   load_balancer_arn = aws_alb.main.arn
-  port = "80"
-  protocol = "HTTP"
+  port              = "80"
+  protocol          = "HTTP"
 
   default_action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_alb_target_group.alb_http.arn
   }
 }

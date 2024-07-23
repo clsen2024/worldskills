@@ -14,19 +14,19 @@ resource "aws_instance" "bastion" {
 }
 
 data "aws_ami" "al2023" {
-  most_recent      = true
-  owners           = ["amazon"]
- 
+  most_recent = true
+  owners      = ["amazon"]
+
   filter {
     name   = "name"
     values = ["al2023-ami-2023.*-x86_64"]
   }
- 
+
   filter {
     name   = "architecture"
     values = ["x86_64"]
   }
- 
+
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
@@ -34,19 +34,19 @@ data "aws_ami" "al2023" {
 }
 
 data "aws_ami" "ecs" {
-  most_recent      = true
-  owners           = ["amazon"]
- 
+  most_recent = true
+  owners      = ["amazon"]
+
   filter {
     name   = "name"
     values = ["al2023-ami-ecs-hvm-2023.*-x86_64"]
   }
- 
+
   filter {
     name   = "architecture"
     values = ["x86_64"]
   }
- 
+
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
@@ -89,7 +89,6 @@ resource "aws_iam_role" "admin" {
       {
         Action = "sts:AssumeRole"
         Effect = "Allow"
-        Sid    = ""
         Principal = {
           Service = "ec2.amazonaws.com"
         }
@@ -164,8 +163,8 @@ resource "aws_iam_role_policy_attachment" "ecs" {
 }
 
 resource "aws_iam_instance_profile" "ecs" {
-  name  = aws_iam_role.ecs.name
-  role  = aws_iam_role.ecs.name
+  name = aws_iam_role.ecs.name
+  role = aws_iam_role.ecs.name
 }
 
 data "aws_iam_policy_document" "ecs" {
@@ -174,7 +173,7 @@ data "aws_iam_policy_document" "ecs" {
     effect  = "Allow"
 
     principals {
-      type        = "Service"
+      type = "Service"
       identifiers = [
         "ec2.amazonaws.com"
       ]
@@ -183,12 +182,11 @@ data "aws_iam_policy_document" "ecs" {
 }
 
 resource "aws_autoscaling_group" "ecs" {
-  name                  = "ecs_instance_asg"
-  max_size              = 2
-  min_size              = 2
-  vpc_zone_identifier   = [aws_subnet.private-a.id, aws_subnet.private-b.id]
-  health_check_type     = "EC2"
-  protect_from_scale_in = true
+  name                = "ecs_instance_asg"
+  max_size            = 2
+  min_size            = 2
+  vpc_zone_identifier = [aws_subnet.private-a.id, aws_subnet.private-b.id]
+  health_check_type   = "EC2"
 
   enabled_metrics = [
     "GroupMinSize",
