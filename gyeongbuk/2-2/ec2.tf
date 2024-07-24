@@ -90,20 +90,22 @@ resource "aws_key_pair" "wsi" {
 }
 
 resource "aws_iam_role" "poweruser" {
-  name = "wsi-role-bastion"
+  name               = "wsi-role-bastion"
+  assume_role_policy = data.aws_iam_policy_document.ec2.json
+}
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
+data "aws_iam_policy_document" "ec2" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "ec2.amazonaws.com"
+      ]
+    }
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "poweruser" {
@@ -120,7 +122,7 @@ resource "aws_launch_template" "app" {
   name                   = "app_instance"
   image_id               = data.aws_ami.al2023-64.id
   instance_type          = "t3.medium"
-  key_name = aws_key_pair.wsi.key_name
+  key_name               = aws_key_pair.wsi.key_name
   user_data              = base64encode(data.template_file.user_data.rendered)
   vpc_security_group_ids = [aws_security_group.app.id]
 
@@ -196,20 +198,6 @@ resource "aws_iam_instance_profile" "app" {
   role = aws_iam_role.app.name
 }
 
-data "aws_iam_policy_document" "ec2" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
-
-    principals {
-      type = "Service"
-      identifiers = [
-        "ec2.amazonaws.com"
-      ]
-    }
-  }
-}
-
 resource "aws_autoscaling_group" "app" {
   name                = "app_instance_asg"
   min_size            = 2
@@ -245,9 +233,9 @@ resource "aws_alb_target_group" "app" {
   protocol             = "HTTP"
   vpc_id               = aws_vpc.main.id
   deregistration_delay = 60
-  
+
   health_check {
-    path = "/healthcheck"  
+    path = "/healthcheck"
   }
 }
 

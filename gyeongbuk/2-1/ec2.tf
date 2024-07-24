@@ -81,20 +81,22 @@ resource "aws_key_pair" "wsi" {
 }
 
 resource "aws_iam_role" "admin" {
-  name = "wsi-bastion-role"
+  name               = "wsi-bastion-role"
+  assume_role_policy = data.aws_iam_policy_document.ec2.json
+}
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
+data "aws_iam_policy_document" "ec2" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "ec2.amazonaws.com"
+      ]
+    }
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "admin" {
@@ -154,7 +156,7 @@ data "template_file" "user_data" {
 
 resource "aws_iam_role" "ecs" {
   name               = "ecs_instance_role"
-  assume_role_policy = data.aws_iam_policy_document.ecs.json
+  assume_role_policy = data.aws_iam_policy_document.ec2.json
 }
 
 resource "aws_iam_role_policy_attachment" "ecs" {
@@ -165,20 +167,6 @@ resource "aws_iam_role_policy_attachment" "ecs" {
 resource "aws_iam_instance_profile" "ecs" {
   name = aws_iam_role.ecs.name
   role = aws_iam_role.ecs.name
-}
-
-data "aws_iam_policy_document" "ecs" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
-
-    principals {
-      type = "Service"
-      identifiers = [
-        "ec2.amazonaws.com"
-      ]
-    }
-  }
 }
 
 resource "aws_autoscaling_group" "ecs" {

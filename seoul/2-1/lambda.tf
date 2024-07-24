@@ -1,6 +1,6 @@
 data "archive_file" "lambda" {
   type        = "zip"
-  source_dir = "function/lambda_edge"
+  source_dir  = "function/lambda_edge"
   output_path = "function/lambda_edge.zip"
 }
 

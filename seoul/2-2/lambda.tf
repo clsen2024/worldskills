@@ -64,7 +64,7 @@ resource "aws_lambda_function" "preserve" {
   handler       = "main.lambda_handler"
 
   source_code_hash = data.archive_file.preserve.output_base64sha256
-  timeout = 30
+  timeout          = 30
   environment {
     variables = {
       ACCOUNT_ID = local.account_id

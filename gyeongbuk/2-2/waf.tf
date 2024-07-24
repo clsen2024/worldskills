@@ -7,8 +7,8 @@ resource "aws_wafv2_web_acl" "app" {
   }
 
   custom_response_body {
-    key = "unauthorized"
-    content = "Blocked by WAF"
+    key          = "unauthorized"
+    content      = "Blocked by WAF"
     content_type = "TEXT_PLAIN"
   }
 
@@ -20,7 +20,7 @@ resource "aws_wafv2_web_acl" "app" {
       block {
         custom_response {
           custom_response_body_key = "unauthorized"
-          response_code = 401
+          response_code            = 401
         }
       }
     }
@@ -29,17 +29,17 @@ resource "aws_wafv2_web_acl" "app" {
       and_statement {
         statement {
           byte_match_statement {
-              field_to_match {
-                  uri_path {}
-              }
+            field_to_match {
+              uri_path {}
+            }
 
-              positional_constraint = "EXACTLY"
-              search_string = "/v1/token/verify"
+            positional_constraint = "EXACTLY"
+            search_string         = "/v1/token/verify"
 
-              text_transformation {
-                  type = "NONE"
-                  priority = 0
-              }
+            text_transformation {
+              type     = "NONE"
+              priority = 0
+            }
           }
         }
 
@@ -52,10 +52,10 @@ resource "aws_wafv2_web_acl" "app" {
             }
 
             positional_constraint = "CONTAINS"
-            search_string = "none"
+            search_string         = "none"
 
             text_transformation {
-              type = "BASE64_DECODE"
+              type     = "BASE64_DECODE"
               priority = 0
             }
           }

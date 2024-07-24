@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "config" {
-  bucket = "config-bucket-${local.account_id}"
+  bucket        = "config-bucket-${local.account_id}"
   force_destroy = true
 }
 
