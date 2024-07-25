@@ -1,5 +1,5 @@
 resource "aws_codecommit_repository" "main" {
-  repository_name = "wsi-commit"
+  repository_name = "wsc2024-cci"
 }
 
 data "aws_iam_policy_document" "codebuild_assume" {
@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "codebuild_assume" {
 }
 
 resource "aws_iam_role" "codebuild" {
-  name               = "codebuild-wsi-build-service-role"
+  name               = "codebuild-wsc2024-cbd-service-role"
   assume_role_policy = data.aws_iam_policy_document.codebuild_assume.json
 }
 
@@ -25,8 +25,8 @@ data "aws_iam_policy_document" "codebuild_policy" {
     effect = "Allow"
 
     resources = [
-      "arn:aws:logs:ap-northeast-2:${local.account_id}:log-group:/codebuild/wsi-build",
-      "arn:aws:logs:ap-northeast-2:${local.account_id}:log-group:/codebuild/wsi-build:*",
+      "arn:aws:logs:us-west-1:${local.account_id}:log-group:/codebuild/wsc2024-cbd",
+      "arn:aws:logs:us-west-1:${local.account_id}:log-group:/codebuild/wsc2024-cbd:*",
     ]
 
     actions = [
@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "codebuild_policy" {
 
   statement {
     effect    = "Allow"
-    resources = ["arn:aws:s3:::codepipeline-ap-northeast-2-*"]
+    resources = ["arn:aws:s3:::codepipeline-us-west-1-*", "arn:aws:s3:::dockerfile-temp-${local.account_id}/*"]
 
     actions = [
       "s3:PutObject",
@@ -67,7 +67,7 @@ resource "aws_iam_role_policy_attachment" "ecr_push" {
 }
 
 resource "aws_codebuild_project" "main" {
-  name          = "wsi-build"
+  name          = "wsc2024-cbd"
   build_timeout = 5
   service_role  = aws_iam_role.codebuild.arn
 
@@ -94,7 +94,7 @@ resource "aws_codebuild_project" "main" {
 
   logs_config {
     cloudwatch_logs {
-      group_name  = "/codebuild/wsi-build"
+      group_name  = "/codebuild/wsc2024-cbd"
       stream_name = "ecr-"
     }
   }
@@ -102,12 +102,85 @@ resource "aws_codebuild_project" "main" {
   source {
     type      = "CODECOMMIT"
     location  = aws_codecommit_repository.main.clone_url_http
-    buildspec = file("./buildspec.yml")
   }
 }
 
+resource "aws_codedeploy_app" "main" {
+  compute_platform = "ECS"
+  name             = "wsc2024-cdy"
+}
+
+resource "aws_codedeploy_deployment_group" "main" {
+  app_name               = aws_codedeploy_app.main.name
+  deployment_group_name  = "wsc2024-cdy-dg"
+  deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
+  service_role_arn       = aws_iam_role.codedeploy.arn
+
+  blue_green_deployment_config {
+    deployment_ready_option {
+      action_on_timeout = "CONTINUE_DEPLOYMENT"
+    }
+    terminate_blue_instances_on_deployment_success {
+      action                           = "TERMINATE"
+      termination_wait_time_in_minutes = 0
+    }
+  }
+
+  ecs_service {
+    cluster_name = aws_ecs_cluster.main.name
+    service_name = aws_ecs_service.main.name
+  }
+
+  deployment_style {
+    deployment_option = "WITH_TRAFFIC_CONTROL"
+    deployment_type   = "BLUE_GREEN"
+  }
+
+  auto_rollback_configuration {
+    enabled = true
+    events  = ["DEPLOYMENT_FAILURE"]
+  }
+
+  load_balancer_info {
+    target_group_pair_info {
+      prod_traffic_route {
+        listener_arns = [aws_alb_listener.alb_http.arn]
+      }
+      target_group {
+        name = aws_alb_target_group.blue.name
+      }
+      target_group {
+        name = aws_alb_target_group.green.name
+      }
+    }
+  }
+}
+
+data "aws_iam_policy_document" "codedeploy" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["codedeploy.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "codedeploy" {
+  name               = "AWSCodeDeployRoleForECS"
+  assume_role_policy = data.aws_iam_policy_document.codedeploy.json
+}
+
+resource "aws_iam_role_policy_attachment" "codedeploy" {
+  policy_arn = "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS"
+  role       = aws_iam_role.codedeploy.name
+}
+
 resource "aws_codepipeline" "main" {
-  name           = "wsi-pipeline"
+  name           = "wsc2024-pipeline"
   role_arn       = aws_iam_role.codepipeline.arn
   pipeline_type  = "V2"
   execution_mode = "QUEUED"
@@ -126,12 +199,14 @@ resource "aws_codepipeline" "main" {
       owner            = "AWS"
       provider         = "CodeCommit"
       version          = "1"
-      output_artifacts = ["source_output"]
+      output_artifacts = ["SourceArtifact"]
+      namespace = "CodecommitVariable"
 
       configuration = {
         RepositoryName       = aws_codecommit_repository.main.repository_name
         BranchName           = "main"
         PollForSourceChanges = false
+        OutputArtifactFormat = "CODE_ZIP"
       }
     }
   }
@@ -144,8 +219,8 @@ resource "aws_codepipeline" "main" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      input_artifacts  = ["SourceArtifact"]
+      output_artifacts = ["BuildArtifact"]
       version          = "1"
 
       configuration = {
@@ -155,27 +230,48 @@ resource "aws_codepipeline" "main" {
   }
 
   stage {
-    name = "Deploy"
+    name = "CodeCommit_Check"
 
+    action {
+      name     = "ApproveChangeSet"
+      category = "Approval"
+      owner    = "AWS"
+      provider = "Manual"
+      version  = "1"
+
+      configuration = {
+        CustomData = "new CommitID : #{CodecommitVariable.CommitId}"
+        ExternalEntityLink = "https://us-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/${aws_codecommit_repository.main.repository_name}/commit/#{CodecommitVariable.CommitId}?region=us-west-1"
+      }
+    }
+  }
+
+  stage {
+    name = "Deploy"
     action {
       name            = "Deploy"
       category        = "Deploy"
       owner           = "AWS"
-      provider        = "ECS"
-      input_artifacts = ["build_output"]
+      provider        = "CodeDeployToECS"
       version         = "1"
+      input_artifacts = ["BuildArtifact"]
 
       configuration = {
-        ClusterName = aws_ecs_cluster.main.name
-        ServiceName = aws_ecs_service.main.name
-        FileName    = "imagedefinitions.json"
+        ApplicationName                = aws_codedeploy_app.main.name
+        DeploymentGroupName            = aws_codedeploy_deployment_group.main.deployment_group_name
+        AppSpecTemplateArtifact        = "BuildArtifact"
+        AppSpecTemplatePath            = "appspec.yml"
+        TaskDefinitionTemplateArtifact = "BuildArtifact"
+        TaskDefinitionTemplatePath     = "taskdef.json"
+        Image1ArtifactName             = "BuildArtifact"
+        Image1ContainerName            = "IMAGE"
       }
     }
   }
 }
 
 resource "aws_s3_bucket" "codepipeline" {
-  bucket        = "codepipeline-ap-northeast-2-${local.account_id}"
+  bucket        = "codepipeline-us-west-1-${local.account_id}"
   force_destroy = true
 }
 
@@ -193,7 +289,7 @@ data "aws_iam_policy_document" "codepipeline_assume" {
 }
 
 resource "aws_iam_role" "codepipeline" {
-  name               = "AWSCodePipelineServiceRole-ap-northeast-2-wsi-pipeline"
+  name               = "AWSCodePipelineServiceRole-us-west-1-wsc2024-pipeline"
   assume_role_policy = data.aws_iam_policy_document.codepipeline_assume.json
 }
 

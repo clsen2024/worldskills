@@ -1,0 +1,45 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "wsc2024",
+            "image": "<IMAGE>",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "name": "wsc2024-8080-tcp",
+                    "containerPort": 8080,
+                    "hostPort": 8080,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                }
+            ],
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/wsc2024-td",
+                    "awslogs-region": "us-west-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost:8080/healthcheck || exit 1"
+                ]
+            }
+        }
+    ],
+    "family": "wsc2024-td",
+    "executionRoleArn": "arn:aws:iam::379004133274:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "512",
+    "memory": "1024",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    }
+}
