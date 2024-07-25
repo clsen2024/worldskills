@@ -100,8 +100,8 @@ resource "aws_codebuild_project" "main" {
   }
 
   source {
-    type      = "CODECOMMIT"
-    location  = aws_codecommit_repository.main.clone_url_http
+    type     = "CODECOMMIT"
+    location = aws_codecommit_repository.main.clone_url_http
   }
 }
 
@@ -200,7 +200,7 @@ resource "aws_codepipeline" "main" {
       provider         = "CodeCommit"
       version          = "1"
       output_artifacts = ["SourceArtifact"]
-      namespace = "CodecommitVariable"
+      namespace        = "CodecommitVariable"
 
       configuration = {
         RepositoryName       = aws_codecommit_repository.main.repository_name
@@ -240,7 +240,7 @@ resource "aws_codepipeline" "main" {
       version  = "1"
 
       configuration = {
-        CustomData = "new CommitID : #{CodecommitVariable.CommitId}"
+        CustomData         = "new CommitID : #{CodecommitVariable.CommitId}"
         ExternalEntityLink = "https://us-west-1.console.aws.amazon.com/codesuite/codecommit/repositories/${aws_codecommit_repository.main.repository_name}/commit/#{CodecommitVariable.CommitId}?region=us-west-1"
       }
     }

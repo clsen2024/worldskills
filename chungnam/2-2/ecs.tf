@@ -15,10 +15,10 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family             = "wsc2024-td"
+  family                   = "wsc2024-td"
   requires_compatibilities = ["FARGATE"]
-  network_mode = "awsvpc"
-  execution_role_arn = aws_iam_role.task_exec.arn
+  network_mode             = "awsvpc"
+  execution_role_arn       = aws_iam_role.task_exec.arn
 
   container_definitions = jsonencode([
     {
@@ -49,8 +49,8 @@ resource "aws_ecs_task_definition" "main" {
     }
   ])
 
-  cpu          = 512
-  memory       = 1024
+  cpu    = 512
+  memory = 1024
 
   lifecycle {
     ignore_changes = [container_definitions]
@@ -100,8 +100,8 @@ resource "aws_ecs_service" "main" {
   }
 
   network_configuration {
-    subnets = [aws_subnet.private-a.id, aws_subnet.private-b.id]
-    security_groups = [ aws_security_group.ecs.id ]
+    subnets          = [aws_subnet.private-a.id, aws_subnet.private-b.id]
+    security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = false
   }
 
@@ -124,9 +124,9 @@ resource "aws_security_group" "ecs" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port        = 8080
-    to_port          = 8080
-    protocol         = "tcp"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
 
@@ -182,7 +182,7 @@ resource "aws_alb_target_group" "blue" {
   name                 = "wsc2024-blue-tg"
   port                 = "8080"
   protocol             = "HTTP"
-  target_type = "ip"
+  target_type          = "ip"
   vpc_id               = aws_vpc.main.id
   deregistration_delay = 60
 }
@@ -191,7 +191,7 @@ resource "aws_alb_target_group" "green" {
   name                 = "wsc2024-green-tg"
   port                 = "8080"
   protocol             = "HTTP"
-  target_type = "ip"
+  target_type          = "ip"
   vpc_id               = aws_vpc.main.id
   deregistration_delay = 60
 }
