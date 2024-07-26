@@ -1,0 +1,52 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 13,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "${metrics_namespace}",
+            "${metrics_name}",
+            {
+              "label": "SSM Access"
+            }
+          ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "title": "SSM Access Count",
+        "region": "ap-northeast-2",
+        "stat": "Sum",
+        "period": 30,
+        "annotations": {
+          "horizontal": [
+            {
+              "color": "#ffbb78",
+              "label": "Warning",
+              "value": 10,
+              "fill": "above"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "log",
+      "x": 0,
+      "y": 6,
+      "width": 13,
+      "height": 6,
+      "properties": {
+        "query": "SOURCE 'cloudtrail/cg-trail' | fields eventTime, eventSource, \"Active\" as state, userIdentity.accountId as accountId, responseElements.sessionId as sessionId\n| filter eventName = \"StartSession\" and requestParameters.target = \"${instance_id}\"\n| sort eveventTime desc",
+        "region": "ap-northeast-2",
+        "stacked": false,
+        "view": "table",
+        "title": "SSM Access Logs"
+      }
+    }
+  ]
+}
