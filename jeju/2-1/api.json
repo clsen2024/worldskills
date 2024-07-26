@@ -1,0 +1,66 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "serverless-api-gw",
+    "version": "1.0"
+  },
+  "paths": {
+    "/user": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "content": {}
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws",
+          "credentials": "${get_role_arn}",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:ap-northeast-2:dynamodb:action/GetItem",
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseTemplates": {
+                "application/json": "{\r\n  \"id\": $input.json('$.Item.id.S'),\r\n  \"age\": $input.json('$.Item.age.S'),\r\n  \"company\": $input.json('$.Item.company.S')\r\n}\r\n"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\r\n  \"TableName\": \"${table_name}\",\r\n  \"Key\": {\r\n    \"id\": {\r\n      \"S\": \"$input.params('id')\"\r\n    }\r\n  }\r\n}\r\n"
+          },
+          "passthroughBehavior": "when_no_match",
+          "timeoutInMillis": 29000
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "content": {}
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "type": "aws",
+          "credentials": "${post_role_arn}",
+          "httpMethod": "POST",
+          "uri": "arn:aws:apigateway:ap-northeast-2:dynamodb:action/PutItem",
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseTemplates": {
+                "application/json": "#if($context.responseOverride.status == 500)\r\n{\r\n  \"message\": \"Internal server error\"\r\n}\r\n#else\r\n{\r\n  \"msg\": \"Success insert data\"\r\n}\r\n#end\r\n"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "#if($input.params(\"id\").contains(\"admin\"))\r\n#set($context.responseOverride.status = 500)\r\n#else\r\n{ \r\n  \"TableName\": \"${table_name}\",\r\n  \"Item\": {\r\n    \"id\": {\r\n      \"S\": \"$input.params('id')\"\r\n    },\r\n    \"age\": {\r\n      \"S\": \"$input.params('age')\"\r\n    },\r\n    \"company\": {\r\n      \"S\": \"$input.params('company')\"\r\n    }\r\n  }\r\n}\r\n#end\r\n"
+          },
+          "passthroughBehavior": "when_no_match",
+          "timeoutInMillis": 29000
+        }
+      }
+    }
+  },
+  "components": {}
+}
