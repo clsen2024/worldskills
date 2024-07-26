@@ -49,15 +49,15 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.ap-northeast-2.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids = [aws_route_table.private-rt.id]
+  route_table_ids   = [aws_route_table.private-rt.id]
 }
 
 resource "aws_vpc_endpoint" "sqs" {
-  vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.ap-northeast-2.sqs"
-  vpc_endpoint_type = "Interface"
-  subnet_ids = [aws_subnet.private-a.id, aws_subnet.private-b.id]
-  security_group_ids = [aws_security_group.endpoint.id]
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.ap-northeast-2.sqs"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = [aws_subnet.private-a.id, aws_subnet.private-b.id]
+  security_group_ids  = [aws_security_group.endpoint.id]
   private_dns_enabled = true
 }
 
@@ -67,10 +67,10 @@ resource "aws_security_group" "endpoint" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.main.cidr_block]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
   egress {

@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "original" {
-  bucket = "j-s3-bucket-hellohi-original"
+  bucket        = "j-s3-bucket-hellohi-original"
   force_destroy = true
 }
 
@@ -11,7 +11,7 @@ resource "aws_s3_bucket_versioning" "original" {
 }
 
 resource "aws_s3_bucket" "backup" {
-  bucket = "j-s3-bucket-hellohi-backup"
+  bucket        = "j-s3-bucket-hellohi-backup"
   force_destroy = true
 }
 

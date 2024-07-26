@@ -13,7 +13,7 @@ resource "aws_instance" "bastion" {
 }
 
 resource "aws_ec2_instance_connect_endpoint" "main" {
-  subnet_id = aws_subnet.private-b.id
+  subnet_id          = aws_subnet.private-b.id
   security_group_ids = [aws_security_group.conn.id]
 }
 
@@ -43,10 +43,10 @@ resource "aws_security_group" "conn" {
   vpc_id      = aws_vpc.main.id
 
   egress {
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.main.cidr_block]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
   }
 }
 
@@ -56,9 +56,9 @@ resource "aws_security_group" "bastion" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.conn.id]
   }
 
