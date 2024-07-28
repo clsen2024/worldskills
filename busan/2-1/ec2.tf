@@ -1,0 +1,104 @@
+resource "aws_instance" "bastion" {
+  ami                         = data.aws_ami.al2023.id
+  associate_public_ip_address = true
+  instance_type               = "t3.micro"
+  subnet_id                   = aws_subnet.public-b.id
+  disable_api_termination     = true
+  key_name                    = aws_key_pair.wsi.key_name
+  vpc_security_group_ids      = [aws_security_group.bastion.id]
+  iam_instance_profile        = aws_iam_instance_profile.admin.name
+  user_data = <<-EOF
+    #!/bin/bash
+    yum update -y
+    yum install -y git
+  EOF
+
+  tags = {
+    Name = "wsi-project-ec2"
+  }
+}
+
+resource "aws_eip" "bastion" {
+  domain   = "vpc"
+  instance = aws_instance.bastion.id
+
+  tags = {
+    Name = "wsi-project-ec2-eip"
+  }
+}
+
+data "aws_ami" "al2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023.*-x86_64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+resource "aws_security_group" "bastion" {
+  name        = "wsi-project-ec2-sg"
+  description = "Allow SSH traffic"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+resource "aws_key_pair" "wsi" {
+  key_name   = "wsi"
+  public_key = file("~/.ssh/id_rsa.pub")
+}
+
+resource "aws_iam_role" "admin" {
+  name               = "wsi-project-ec2-role"
+  assume_role_policy = data.aws_iam_policy_document.ec2.json
+}
+
+data "aws_iam_policy_document" "ec2" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "ec2.amazonaws.com"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "admin" {
+  role       = aws_iam_role.admin.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+resource "aws_iam_instance_profile" "admin" {
+  name = aws_iam_role.admin.name
+  role = aws_iam_role.admin.name
+}
