@@ -1,0 +1,146 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "wsi-api",
+    "version" : "1.0"
+  },
+  "paths" : {
+    "/user" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "credentials" : "${get_role_arn}",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:ap-northeast-2:dynamodb:action/GetItem",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseTemplates" : {
+                "application/json" : "{\n    \"name\": $input.json('$.Item.name.S'),\n    \"age\": $input.json('$.Item.age.N'),\n    \"country\": $input.json('$.Item.country.S')\n}"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\n    \"TableName\": \"${table_name}\",\n    \"Key\": {\n        \"name\": {\n            \"S\": \"$input.params('name')\"\n        }\n    }\n}"
+          },
+          "passthroughBehavior" : "never",
+          "type" : "aws"
+        }
+      },
+      "post" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "credentials" : "${post_role_arn}",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:ap-northeast-2:dynamodb:action/PutItem",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseTemplates" : {
+                "application/json" : "{\"msg\": \"Finished\"}"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{ \n    \"TableName\": \"${table_name}\",\n    \"Item\": {\n    \t\"name\": {\n            \"S\": $input.json('$.name')\n        },\n        \"age\": {\n            \"N\": \"$input.json('$.age')\"\n        },\n        \"country\": {\n            \"S\": $input.json('$.country')\n        }\n    }\n}"
+          },
+          "passthroughBehavior" : "never",
+          "type" : "aws"
+        }
+      },
+      "delete" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "credentials" : "${delete_role_arn}",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:ap-northeast-2:dynamodb:action/DeleteItem",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseTemplates" : {
+                "application/json" : "{\"msg\": \"Deleted\"}"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\n    \"TableName\": \"${table_name}\",\n    \"Key\": {\n        \"name\": {\n            \"S\": \"$input.params('name')\"\n        }\n    }\n}"
+          },
+          "passthroughBehavior" : "never",
+          "type" : "aws"
+        }
+      }
+    },
+    "/healthz" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseTemplates" : {
+                "application/json" : "{\"status\": \"ok\"}"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match",
+          "type" : "mock"
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Empty" : {
+        "title" : "Empty Schema",
+        "type" : "object"
+      }
+    }
+  }
+}

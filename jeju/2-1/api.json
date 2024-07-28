@@ -10,7 +10,13 @@
         "responses": {
           "200": {
             "description": "200 response",
-            "content": {}
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
           }
         },
         "x-amazon-apigateway-integration": {
@@ -29,7 +35,7 @@
           "requestTemplates": {
             "application/json": "{\r\n  \"TableName\": \"${table_name}\",\r\n  \"Key\": {\r\n    \"id\": {\r\n      \"S\": \"$input.params('id')\"\r\n    }\r\n  }\r\n}\r\n"
           },
-          "passthroughBehavior": "when_no_match",
+          "passthroughBehavior": "never",
           "timeoutInMillis": 29000
         }
       },
@@ -37,7 +43,13 @@
         "responses": {
           "200": {
             "description": "200 response",
-            "content": {}
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
           }
         },
         "x-amazon-apigateway-integration": {
@@ -56,11 +68,18 @@
           "requestTemplates": {
             "application/json": "#if($input.params(\"id\").contains(\"admin\"))\r\n#set($context.responseOverride.status = 500)\r\n#else\r\n{ \r\n  \"TableName\": \"${table_name}\",\r\n  \"Item\": {\r\n    \"id\": {\r\n      \"S\": \"$input.params('id')\"\r\n    },\r\n    \"age\": {\r\n      \"S\": \"$input.params('age')\"\r\n    },\r\n    \"company\": {\r\n      \"S\": \"$input.params('company')\"\r\n    }\r\n  }\r\n}\r\n#end\r\n"
           },
-          "passthroughBehavior": "when_no_match",
+          "passthroughBehavior": "never",
           "timeoutInMillis": 29000
         }
       }
     }
   },
-  "components": {}
+  "components" : {
+    "schemas" : {
+      "Empty" : {
+        "title" : "Empty Schema",
+        "type" : "object"
+      }
+    }
+  }
 }
