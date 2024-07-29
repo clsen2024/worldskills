@@ -55,7 +55,7 @@ data "aws_iam_policy_document" "user1" {
 }
 
 resource "aws_iam_user_policy" "user1" {
-  user       = aws_iam_user.user1.name
+  user   = aws_iam_user.user1.name
   policy = data.aws_iam_policy_document.user1.json
 }
 
@@ -86,6 +86,6 @@ data "aws_iam_policy_document" "user2" {
 }
 
 resource "aws_iam_user_policy" "user2" {
-  user       = aws_iam_user.user2.name
+  user   = aws_iam_user.user2.name
   policy = data.aws_iam_policy_document.user2.json
 }

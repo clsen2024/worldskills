@@ -1,5 +1,6 @@
 resource "aws_codecommit_repository" "main" {
   repository_name = "wsc2024-cci"
+  default_branch = "main"
 }
 
 data "aws_iam_policy_document" "codebuild_assume" {

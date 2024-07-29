@@ -7,7 +7,7 @@ resource "aws_instance" "bastion" {
   key_name                    = aws_key_pair.wsi.key_name
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   iam_instance_profile        = aws_iam_instance_profile.admin.name
-  user_data = <<-EOF
+  user_data                   = <<-EOF
     #!/bin/bash
     yum update -y
     yum install -y git

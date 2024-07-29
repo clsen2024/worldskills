@@ -1,6 +1,6 @@
 resource "aws_codecommit_repository" "main" {
-  repository_name = "wsi-commit"
-  default_branch = "main"
+  repository_name = "wsi-repo"
+  default_branch  = "main"
 }
 
 data "aws_iam_policy_document" "codebuild_assume" {
@@ -101,10 +101,60 @@ resource "aws_codebuild_project" "main" {
   }
 
   source {
-    type      = "CODECOMMIT"
-    location  = aws_codecommit_repository.main.clone_url_http
-    buildspec = file("./buildspec.yml")
+    type     = "CODECOMMIT"
+    location = aws_codecommit_repository.main.clone_url_http
   }
+}
+
+resource "aws_ecr_repository" "main" {
+  name         = "wsi-ecr"
+  force_delete = true
+}
+
+resource "aws_codedeploy_app" "main" {
+  name = "wsi-app"
+}
+
+resource "aws_codedeploy_deployment_group" "main" {
+  app_name              = aws_codedeploy_app.main.name
+  deployment_group_name = "wsi-dg"
+  service_role_arn      = aws_iam_role.codedeploy.arn
+
+  ec2_tag_set {
+    ec2_tag_filter {
+      key   = "Name"
+      type  = "KEY_AND_VALUE"
+      value = "wsi-server"
+    }
+  }
+
+  auto_rollback_configuration {
+    enabled = true
+    events  = ["DEPLOYMENT_FAILURE"]
+  }
+}
+
+data "aws_iam_policy_document" "codedeploy" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["codedeploy.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "codedeploy" {
+  name               = "AWSCodeDeployRole"
+  assume_role_policy = data.aws_iam_policy_document.codedeploy.json
+}
+
+resource "aws_iam_role_policy_attachment" "codedeploy" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"
+  role       = aws_iam_role.codedeploy.name
 }
 
 resource "aws_codepipeline" "main" {
@@ -127,12 +177,13 @@ resource "aws_codepipeline" "main" {
       owner            = "AWS"
       provider         = "CodeCommit"
       version          = "1"
-      output_artifacts = ["source_output"]
+      output_artifacts = ["SourceArtifact"]
 
       configuration = {
         RepositoryName       = aws_codecommit_repository.main.repository_name
         BranchName           = "main"
         PollForSourceChanges = false
+        OutputArtifactFormat = "CODE_ZIP"
       }
     }
   }
@@ -145,8 +196,8 @@ resource "aws_codepipeline" "main" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      input_artifacts  = ["SourceArtifact"]
+      output_artifacts = ["BuildArtifact"]
       version          = "1"
 
       configuration = {
@@ -157,19 +208,17 @@ resource "aws_codepipeline" "main" {
 
   stage {
     name = "Deploy"
-
     action {
       name            = "Deploy"
       category        = "Deploy"
       owner           = "AWS"
-      provider        = "ECS"
-      input_artifacts = ["build_output"]
+      provider        = "CodeDeploy"
       version         = "1"
+      input_artifacts = ["BuildArtifact"]
 
       configuration = {
-        ClusterName = aws_ecs_cluster.main.name
-        ServiceName = aws_ecs_service.main.name
-        FileName    = "imagedefinitions.json"
+        ApplicationName     = aws_codedeploy_app.main.name
+        DeploymentGroupName = aws_codedeploy_deployment_group.main.deployment_group_name
       }
     }
   }
