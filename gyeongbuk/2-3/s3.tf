@@ -10,5 +10,5 @@ resource "aws_s3_object" "app" {
   key    = each.value
   source = "app/${each.value}"
 
-  etag   = filemd5("app/${each.value}")
+  etag = filemd5("app/${each.value}")
 }

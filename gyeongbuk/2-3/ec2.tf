@@ -70,7 +70,7 @@ resource "aws_key_pair" "wsi" {
 }
 
 resource "aws_iam_role" "admin" {
-  name = "wsi-bastion-role"
+  name               = "wsi-bastion-role"
   assume_role_policy = data.aws_iam_policy_document.ec2.json
 }
 
@@ -85,13 +85,13 @@ resource "aws_iam_instance_profile" "admin" {
 }
 
 resource "aws_instance" "app" {
-  ami                         = data.aws_ami.al2023.id
-  instance_type               = "t3.small"
-  subnet_id                   = aws_subnet.private-a.id
-  key_name                    = aws_key_pair.wsi.key_name
-  vpc_security_group_ids      = [aws_security_group.app.id]
-  iam_instance_profile        = aws_iam_instance_profile.app.name
-  user_data_base64 = base64encode(data.template_file.user_data.rendered)
+  ami                    = data.aws_ami.al2023.id
+  instance_type          = "t3.small"
+  subnet_id              = aws_subnet.private-a.id
+  key_name               = aws_key_pair.wsi.key_name
+  vpc_security_group_ids = [aws_security_group.app.id]
+  iam_instance_profile   = aws_iam_instance_profile.app.name
+  user_data              = data.template_file.user_data.rendered
 
   tags = {
     Name = "wsi-app"
@@ -102,7 +102,7 @@ data "template_file" "user_data" {
   template = file("user_data.sh")
 
   vars = {
-    bucket_name = aws_s3_bucket.app.id
+    bucket_name    = aws_s3_bucket.app.id
     opensearch_url = aws_opensearch_domain.main.endpoint
   }
 }

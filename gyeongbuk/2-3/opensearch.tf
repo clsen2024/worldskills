@@ -4,15 +4,15 @@ resource "aws_opensearch_domain" "main" {
 
   cluster_config {
     dedicated_master_enabled = true
-    dedicated_master_type = "r5.large.search"
-    dedicated_master_count = 3
+    dedicated_master_type    = "r5.large.search"
+    dedicated_master_count   = 3
 
     zone_awareness_enabled = true
     zone_awareness_config {
       availability_zone_count = 2
     }
 
-    instance_type = "r5.large.search"
+    instance_type  = "r5.large.search"
     instance_count = 2
   }
 
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "opensearch" {
 }
 
 resource "opensearch_roles_mapping" "app" {
-  role_name   = "all_access"
+  role_name = "all_access"
   backend_roles = [
     aws_iam_role.app.arn
   ]

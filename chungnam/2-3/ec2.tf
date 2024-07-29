@@ -1,12 +1,12 @@
 resource "aws_instance" "bastion" {
-  ami                         = data.aws_ami.al2023.id
-  instance_type               = "t3.small"
-  subnet_id                   = aws_subnet.private-a.id
-  disable_api_termination     = true
-  key_name                    = aws_key_pair.wsi.key_name
-  vpc_security_group_ids      = [aws_security_group.bastion.id]
-  iam_instance_profile        = aws_iam_instance_profile.bastion.name
-  user_data_base64 = base64encode(data.template_file.user_data.rendered)
+  ami                     = data.aws_ami.al2023.id
+  instance_type           = "t3.small"
+  subnet_id               = aws_subnet.private-a.id
+  disable_api_termination = true
+  key_name                = aws_key_pair.wsi.key_name
+  vpc_security_group_ids  = [aws_security_group.bastion.id]
+  iam_instance_profile    = aws_iam_instance_profile.bastion.name
+  user_data               = data.template_file.user_data.rendered
 
   tags = {
     Name = "gm-bastion"
@@ -62,9 +62,9 @@ resource "aws_security_group" "bastion" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port        = 5000
-    to_port          = 5000
-    protocol         = "tcp"
+    from_port       = 5000
+    to_port         = 5000
+    protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
 
@@ -185,7 +185,7 @@ resource "aws_iam_instance_profile" "scripts" {
 resource "aws_alb" "main" {
   name            = "gm-alb"
   security_groups = [aws_security_group.alb.id]
-  internal = true
+  internal        = true
   subnets         = [aws_subnet.private-a.id, aws_subnet.private-b.id]
 
   tags = {

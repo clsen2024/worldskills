@@ -82,7 +82,7 @@ resource "aws_route_table" "private-rt" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat-a.id
   }
 
@@ -107,8 +107,8 @@ resource "aws_route_table_association" "private-b-join" {
 }
 
 resource "aws_vpc_endpoint" "s3" {
-  vpc_id       = aws_vpc.main.id
-  service_name = "com.amazonaws.ap-northeast-2.s3"
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-northeast-2.s3"
   vpc_endpoint_type = "Gateway"
 
   route_table_ids = [aws_route_table.private-rt.id]
@@ -119,8 +119,8 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 resource "aws_vpc_endpoint" "dynamodb" {
-  vpc_id       = aws_vpc.main.id
-  service_name = "com.amazonaws.ap-northeast-2.dynamodb"
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-northeast-2.dynamodb"
   vpc_endpoint_type = "Gateway"
 
   route_table_ids = [aws_route_table.private-rt.id]
@@ -132,7 +132,7 @@ resource "aws_vpc_endpoint" "dynamodb" {
 
 resource "aws_vpc_endpoint_policy" "dynamodb" {
   vpc_endpoint_id = aws_vpc_endpoint.dynamodb.id
-  policy = data.aws_iam_policy_document.dynamodb.json
+  policy          = data.aws_iam_policy_document.dynamodb.json
 }
 
 data "aws_iam_policy_document" "dynamodb" {

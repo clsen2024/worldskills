@@ -1,8 +1,8 @@
 resource "aws_dynamodb_table" "main" {
-  name           = "gm-db"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "PK"
-  range_key      = "SK"
+  name         = "gm-db"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "PK"
+  range_key    = "SK"
 
   attribute {
     name = "PK"
@@ -20,12 +20,12 @@ resource "aws_dynamodb_table" "main" {
 }
 
 resource "aws_s3_bucket" "main" {
-  bucket = "gm-0612"
+  bucket        = "gm-0612"
   force_destroy = true
 }
 
 resource "aws_s3_bucket" "app" {
-  bucket = "application-temp-${local.account_id}"
+  bucket        = "application-temp-${local.account_id}"
   force_destroy = true
 }
 
@@ -36,5 +36,5 @@ resource "aws_s3_object" "app" {
   key    = each.value
   source = "app/${each.value}"
 
-  etag   = filemd5("app/${each.value}")
+  etag = filemd5("app/${each.value}")
 }
