@@ -7,7 +7,7 @@ resource "aws_instance" "bastion" {
   key_name                    = data.aws_key_pair.wsi.key_name
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   iam_instance_profile        = aws_iam_instance_profile.admin.name
-  user_data = file("./user_data.sh")
+  user_data                   = file("./user_data.sh")
 
   tags = {
     Name = "wsi-bastion-ec2"

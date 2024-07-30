@@ -3,7 +3,7 @@ resource "aws_instance" "bastion" {
   instance_type           = "t3.small"
   subnet_id               = aws_subnet.private-a.id
   disable_api_termination = true
-  key_name                = aws_key_pair.wsi.key_name
+  key_name                = data.aws_key_pair.wsi.key_name
   vpc_security_group_ids  = [aws_security_group.bastion.id]
   iam_instance_profile    = aws_iam_instance_profile.bastion.name
   user_data               = data.template_file.user_data.rendered
@@ -27,7 +27,7 @@ resource "aws_instance" "scripts" {
   instance_type               = "t3.small"
   subnet_id                   = aws_subnet.public-a.id
   disable_api_termination     = true
-  key_name                    = aws_key_pair.wsi.key_name
+  key_name                    = data.aws_key_pair.wsi.key_name
   vpc_security_group_ids      = [aws_security_group.scripts.id]
   iam_instance_profile        = aws_iam_instance_profile.scripts.name
 
@@ -99,9 +99,8 @@ resource "aws_security_group" "scripts" {
   }
 }
 
-resource "aws_key_pair" "wsi" {
-  key_name   = "wsi"
-  public_key = file("~/.ssh/id_rsa.pub")
+data "aws_key_pair" "wsi" {
+  key_name = "wsi"
 }
 
 resource "aws_iam_role" "bastion" {

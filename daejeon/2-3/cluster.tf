@@ -1,13 +1,13 @@
 resource "aws_eks_cluster" "main" {
   name     = "wsi-eks-cluster"
   role_arn = aws_iam_role.cluster.arn
-  version = "1.29"
+  version  = "1.29"
 
   vpc_config {
-    subnet_ids = [aws_subnet.private-a.id, aws_subnet.private-b.id]
+    subnet_ids              = [aws_subnet.private-a.id, aws_subnet.private-b.id]
     endpoint_private_access = true
     endpoint_public_access  = false
-    security_group_ids = [aws_security_group.control-plane.id]
+    security_group_ids      = [aws_security_group.control-plane.id]
   }
   access_config {
     authentication_mode = "API_AND_CONFIG_MAP"
@@ -32,7 +32,7 @@ resource "aws_eks_access_policy_association" "console-allow" {
   access_scope {
     type = "cluster"
   }
-  
+
   depends_on = [aws_eks_access_entry.console-allow]
 }
 
@@ -55,25 +55,25 @@ resource "aws_eks_access_policy_association" "admin-allow" {
 }
 
 resource "aws_eks_addon" "kube-proxy" {
-  cluster_name = aws_eks_cluster.main.name
-  addon_name   = "kube-proxy"
-  addon_version = "v1.29.0-eksbuild.1"
+  cluster_name                = aws_eks_cluster.main.name
+  addon_name                  = "kube-proxy"
+  addon_version               = "v1.29.0-eksbuild.1"
   resolve_conflicts_on_update = "OVERWRITE"
 }
 
 resource "aws_eks_addon" "coredns" {
-  cluster_name = aws_eks_cluster.main.name
-  addon_name   = "coredns"
-  addon_version = "v1.11.1-eksbuild.4"
+  cluster_name                = aws_eks_cluster.main.name
+  addon_name                  = "coredns"
+  addon_version               = "v1.11.1-eksbuild.4"
   resolve_conflicts_on_update = "OVERWRITE"
 
   depends_on = [aws_eks_node_group.app]
 }
 
 resource "aws_eks_addon" "vpc-cni" {
-  cluster_name = aws_eks_cluster.main.name
-  addon_name   = "vpc-cni"
-  addon_version = "v1.16.0-eksbuild.1"
+  cluster_name                = aws_eks_cluster.main.name
+  addon_name                  = "vpc-cni"
+  addon_version               = "v1.16.0-eksbuild.1"
   resolve_conflicts_on_update = "OVERWRITE"
 }
 
@@ -83,9 +83,9 @@ resource "aws_security_group" "control-plane" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
   }
 

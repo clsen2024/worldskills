@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "fluent-bit" {
 }
 
 resource "aws_iam_policy" "fluent-bit" {
-  name = "FluentBitIAMPolicy"
+  name   = "FluentBitIAMPolicy"
   policy = data.aws_iam_policy_document.fluent-bit.json
 }
 

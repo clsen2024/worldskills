@@ -4,7 +4,7 @@ resource "aws_instance" "bastion" {
   instance_type               = "t4g.small"
   subnet_id                   = aws_subnet.public-a.id
   disable_api_termination     = true
-  key_name                    = aws_key_pair.wsi.key_name
+  key_name                    = data.aws_key_pair.wsi.key_name
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   iam_instance_profile        = aws_iam_instance_profile.poweruser.name
 
@@ -84,9 +84,8 @@ resource "aws_security_group" "bastion" {
   }
 }
 
-resource "aws_key_pair" "wsi" {
-  key_name   = "wsi"
-  public_key = file("~/.ssh/id_rsa.pub")
+data "aws_key_pair" "wsi" {
+  key_name = "wsi"
 }
 
 resource "aws_iam_role" "poweruser" {
@@ -122,7 +121,7 @@ resource "aws_launch_template" "app" {
   name                   = "app_instance"
   image_id               = data.aws_ami.al2023-64.id
   instance_type          = "t3.medium"
-  key_name               = aws_key_pair.wsi.key_name
+  key_name               = data.aws_key_pair.wsi.key_name
   user_data              = base64encode(data.template_file.user_data.rendered)
   vpc_security_group_ids = [aws_security_group.app.id]
 

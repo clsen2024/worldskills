@@ -4,7 +4,7 @@ resource "aws_instance" "bastion" {
   instance_type               = "t3.micro"
   subnet_id                   = aws_subnet.public-b.id
   disable_api_termination     = true
-  key_name                    = aws_key_pair.wsi.key_name
+  key_name                    = data.aws_key_pair.wsi.key_name
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   iam_instance_profile        = aws_iam_instance_profile.admin.name
   user_data                   = <<-EOF
@@ -69,9 +69,8 @@ resource "aws_security_group" "bastion" {
   }
 }
 
-resource "aws_key_pair" "wsi" {
-  key_name   = "wsi"
-  public_key = file("~/.ssh/id_rsa.pub")
+data "aws_key_pair" "wsi" {
+  key_name = "wsi"
 }
 
 resource "aws_iam_role" "admin" {
