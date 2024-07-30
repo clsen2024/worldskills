@@ -1,14 +1,16 @@
-resource "aws_instance" "app" {
+resource "aws_instance" "bastion" {
   ami                         = data.aws_ami.al2023.id
   associate_public_ip_address = true
   instance_type               = "t3.small"
+  subnet_id                   = aws_subnet.public-a.id
+  disable_api_termination     = true
   key_name                    = data.aws_key_pair.wsi.key_name
-  vpc_security_group_ids      = [aws_security_group.app.id]
-  iam_instance_profile        = aws_iam_instance_profile.app.name
-  user_data                   = file("./user_data.sh")
+  vpc_security_group_ids      = [aws_security_group.bastion.id]
+  iam_instance_profile        = aws_iam_instance_profile.admin.name
+  user_data = file("./user_data.sh")
 
   tags = {
-    Name = "wsi-server"
+    Name = "wsi-bastion-ec2"
   }
 }
 
@@ -32,18 +34,14 @@ data "aws_ami" "al2023" {
   }
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
-resource "aws_security_group" "app" {
-  name        = "wsi-server-sg"
+resource "aws_security_group" "bastion" {
+  name        = "wsi-bastion-ec2-sg"
   description = "Allow SSH traffic"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port        = 80
-    to_port          = 80
+    from_port        = 22
+    to_port          = 22
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
@@ -62,8 +60,8 @@ data "aws_key_pair" "wsi" {
   key_name = "wsi"
 }
 
-resource "aws_iam_role" "app" {
-  name               = "wsi-server-role"
+resource "aws_iam_role" "admin" {
+  name               = "wsi-bastion-ec2-role"
   assume_role_policy = data.aws_iam_policy_document.ec2.json
 }
 
@@ -81,17 +79,12 @@ data "aws_iam_policy_document" "ec2" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "app-codedeploy" {
-  role       = aws_iam_role.app.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCodeDeploy"
+resource "aws_iam_role_policy_attachment" "admin" {
+  role       = aws_iam_role.admin.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "app-ecr" {
-  role       = aws_iam_role.app.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-}
-
-resource "aws_iam_instance_profile" "app" {
-  name = aws_iam_role.app.name
-  role = aws_iam_role.app.name
+resource "aws_iam_instance_profile" "admin" {
+  name = aws_iam_role.admin.name
+  role = aws_iam_role.admin.name
 }
