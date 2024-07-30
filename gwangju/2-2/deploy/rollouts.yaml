@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: blue-green-app
+  namespace: app
+spec:
+  replicas: 2
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: rollouts
+  template:
+    metadata:
+      labels:
+        app: rollouts
+    spec:
+      containers:
+      - name: gwangju
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/wsi-app:1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+  strategy:
+    blueGreen:
+      activeService: rollout-svc
+      autoPromotionEnabled: true

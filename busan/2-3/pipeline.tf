@@ -58,6 +58,7 @@ data "aws_iam_policy_document" "codebuild_policy" {
 }
 
 resource "aws_iam_role_policy" "codebuild" {
+  name   = "CodebuildPolicy"
   role   = aws_iam_role.codebuild.name
   policy = data.aws_iam_policy_document.codebuild_policy.json
 }
