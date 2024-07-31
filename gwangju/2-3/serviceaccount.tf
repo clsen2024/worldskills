@@ -4,11 +4,12 @@ data "aws_iam_policy_document" "fluent-bit" {
     resources = ["*"]
 
     actions = [
-      "logs:CreateLogStream",
-      "logs:CreateLogGroup",
-      "logs:DescribeLogStreams",
       "logs:PutLogEvents",
+      "logs:CreateLogGroup",
       "logs:PutRetentionPolicy",
+      "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams"
     ]
   }
 }
@@ -29,7 +30,7 @@ module "iam_eks_role" {
   oidc_providers = {
     main = {
       provider_arn               = aws_iam_openid_connect_provider.eks.arn
-      namespace_service_accounts = ["app:fluentd"]
+      namespace_service_accounts = ["fluentd:fluentd"]
     }
   }
 }
