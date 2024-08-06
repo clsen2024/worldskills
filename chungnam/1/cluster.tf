@@ -1,11 +1,11 @@
 resource "aws_eks_cluster" "main" {
-  name                      = "wsi-eks-cluster"
+  name                      = "wsc2024-eks-cluster"
   role_arn                  = aws_iam_role.cluster.arn
   version                   = "1.29"
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   vpc_config {
-    subnet_ids              = [aws_subnet.private-a.id, aws_subnet.private-b.id]
+    subnet_ids              = [aws_subnet.prod-app-a.id, aws_subnet.prod-app-b.id]
     endpoint_private_access = true
     endpoint_public_access  = false
     security_group_ids      = [aws_security_group.control-plane.id]
@@ -78,24 +78,16 @@ resource "aws_eks_addon" "vpc-cni" {
   addon_name   = "vpc-cni"
 }
 
-resource "aws_eks_addon" "cloudwatch" {
-  cluster_name         = aws_eks_cluster.main.name
-  addon_name           = "amazon-cloudwatch-observability"
-  configuration_values = "{\"containerLogs\": {\"enabled\": false}}"
-
-  depends_on = [aws_eks_node_group.addon, aws_eks_node_group.app]
-}
-
 resource "aws_security_group" "control-plane" {
   name        = "control-plane-sg"
   description = "Allow HTTPS traffic"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = aws_vpc.prod.id
 
   ingress {
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    security_groups = [aws_security_group.bastion.id]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["${aws_instance.bastion.private_ip}/32"]
   }
 
   egress {
@@ -137,10 +129,5 @@ resource "aws_iam_role" "cluster" {
 
 resource "aws_iam_role_policy_attachment" "cluster-default" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.cluster.name
-}
-
-resource "aws_iam_role_policy_attachment" "cluster-security-group" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
   role       = aws_iam_role.cluster.name
 }
