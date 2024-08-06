@@ -67,7 +67,7 @@ resource "aws_eks_addon" "coredns" {
   addon_version               = "v1.11.1-eksbuild.4"
   resolve_conflicts_on_update = "OVERWRITE"
 
-  depends_on = [aws_eks_node_group.app]
+  depends_on = [aws_eks_node_group.addon]
 }
 
 resource "aws_eks_addon" "vpc-cni" {

@@ -1,7 +1,8 @@
 resource "aws_eks_cluster" "main" {
-  name     = "wsi-eks-cluster"
-  role_arn = aws_iam_role.cluster.arn
-  version  = "1.29"
+  name                      = "wsi-eks-cluster"
+  role_arn                  = aws_iam_role.cluster.arn
+  version                   = "1.29"
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   vpc_config {
     subnet_ids              = [aws_subnet.private-a.id, aws_subnet.private-b.id]
@@ -55,20 +56,28 @@ resource "aws_eks_access_policy_association" "admin-allow" {
 }
 
 resource "aws_eks_addon" "kube-proxy" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "kube-proxy"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "kube-proxy"
 }
 
 resource "aws_eks_addon" "coredns" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "coredns"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "coredns"
 
-  depends_on = [aws_eks_node_group.app]
+  depends_on = [aws_eks_node_group.addon]
 }
 
 resource "aws_eks_addon" "vpc-cni" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "vpc-cni"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "vpc-cni"
+}
+
+resource "aws_eks_addon" "cloudwatch" {
+  cluster_name         = aws_eks_cluster.main.name
+  addon_name           = "amazon-cloudwatch-observability"
+  configuration_values = "{\"containerLogs\": {\"enabled\": false}}"
+
+  depends_on = [aws_eks_node_group.addon, aws_eks_node_group.app]
 }
 
 resource "aws_security_group" "control-plane" {
@@ -122,5 +131,10 @@ resource "aws_iam_role" "cluster" {
 
 resource "aws_iam_role_policy_attachment" "cluster-default" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.cluster.name
+}
+
+resource "aws_iam_role_policy_attachment" "cluster-security-group" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
   role       = aws_iam_role.cluster.name
 }
