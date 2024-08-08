@@ -32,7 +32,7 @@ module "order" {
   oidc_providers = {
     main = {
       provider_arn               = aws_iam_openid_connect_provider.eks.arn
-      namespace_service_accounts = ["wsi:access-dynamodb"]
+      namespace_service_accounts = ["app:access-dynamodb"]
     }
   }
 }
@@ -43,11 +43,7 @@ data "aws_iam_policy_document" "fluent-bit" {
     resources = ["*"]
 
     actions = [
-      "logs:CreateLogStream",
-      "logs:CreateLogGroup",
-      "logs:DescribeLogStreams",
-      "logs:PutLogEvents",
-      "logs:PutRetentionPolicy"
+      "es:ESHttp*"
     ]
   }
 }
@@ -68,21 +64,7 @@ module "fluent-bit" {
   oidc_providers = {
     main = {
       provider_arn               = aws_iam_openid_connect_provider.eks.arn
-      namespace_service_accounts = ["amazon-cloudwatch:fluent-bit"]
-    }
-  }
-}
-
-module "aws_load_balancer_controller" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-
-  role_name                              = "AmazonEKSLoadBalancerControllerRole"
-  attach_load_balancer_controller_policy = true
-
-  oidc_providers = {
-    main = {
-      provider_arn               = aws_iam_openid_connect_provider.eks.arn
-      namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
+      namespace_service_accounts = ["default:fluent-bit"]
     }
   }
 }
@@ -115,7 +97,7 @@ module "external_secret" {
   oidc_providers = {
     main = {
       provider_arn               = aws_iam_openid_connect_provider.eks.arn
-      namespace_service_accounts = ["wsi:access-secrets"]
+      namespace_service_accounts = ["app:access-secrets"]
     }
   }
 }

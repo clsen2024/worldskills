@@ -7,6 +7,22 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = "ap-northeast-2"
+}
+
+provider "aws" {
+  alias  = "us-east-1"
+  region = "us-east-1"
+}
+
+provider "opensearch" {
+  url               = "https://${aws_opensearch_domain.main.endpoint}"
+  username          = local.username
+  password          = local.password
+  sign_aws_requests = false
+}
+
 data "aws_caller_identity" "current" {}
 
 locals {
@@ -16,9 +32,6 @@ locals {
   caller_arn = data.aws_caller_identity.current.arn
 }
 
-provider "opensearch" {
-  url               = "https://${aws_opensearch_domain.main.endpoint}"
-  username          = local.username
-  password          = local.password
-  sign_aws_requests = false
+variable "code" {
+  type = string
 }

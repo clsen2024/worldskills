@@ -66,6 +66,7 @@ resource "aws_kms_key_policy" "main" {
 
 resource "aws_secretsmanager_secret" "customer" {
   name = "customer"
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "customer" {
@@ -81,6 +82,7 @@ resource "aws_secretsmanager_secret_version" "customer" {
 
 resource "aws_secretsmanager_secret" "product" {
   name = "product"
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "product" {
@@ -96,6 +98,7 @@ resource "aws_secretsmanager_secret_version" "product" {
 
 resource "aws_secretsmanager_secret" "order" {
   name = "order"
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "order" {

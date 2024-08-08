@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "static" {
-  bucket        = "apne2-wsi-static-${var.number}"
+  bucket        = "skills-static-${var.code}"
   force_destroy = true
 }
 

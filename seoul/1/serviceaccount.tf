@@ -87,7 +87,7 @@ module "aws_load_balancer_controller" {
   }
 }
 
-data "aws_iam_policy_document" "external-secret" {
+data "aws_iam_policy_document" "external_secret" {
   statement {
     effect    = "Allow"
     resources = ["*"]
@@ -99,17 +99,17 @@ data "aws_iam_policy_document" "external-secret" {
   }
 }
 
-resource "aws_iam_policy" "external-secret" {
+resource "aws_iam_policy" "external_secret" {
   name   = "ExternalSecretsPolicy"
-  policy = data.aws_iam_policy_document.external-secret.json
+  policy = data.aws_iam_policy_document.external_secret.json
 }
 
-module "external-secret" {
+module "external_secret" {
   source    = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   role_name = "ExternalSecretsRole"
 
   role_policy_arns = {
-    policy = aws_iam_policy.external-secret.arn
+    policy = aws_iam_policy.external_secret.arn
   }
 
   oidc_providers = {

@@ -1,10 +1,10 @@
 resource "aws_opensearch_domain" "main" {
-  domain_name    = "wsi-opensearch"
+  domain_name    = "skills-opensearch-domain"
   engine_version = "OpenSearch_2.13"
 
   cluster_config {
     dedicated_master_enabled = true
-    dedicated_master_type    = "r5.large.search"
+    dedicated_master_type    = "t3.medium.search"
     dedicated_master_count   = 3
 
     zone_awareness_enabled = true
@@ -12,7 +12,7 @@ resource "aws_opensearch_domain" "main" {
       availability_zone_count = 2
     }
 
-    instance_type  = "r5.large.search"
+    instance_type  = "t3.medium.search"
     instance_count = 2
   }
 
@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "opensearch" {
     }
 
     actions   = ["es:*"]
-    resources = ["arn:aws:es:ap-northeast-2:${local.account_id}:domain/wsi-opensearch/*"]
+    resources = ["arn:aws:es:ap-northeast-2:${local.account_id}:domain/skills-opensearch-domain/*"]
   }
 }
 

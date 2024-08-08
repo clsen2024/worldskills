@@ -30,19 +30,19 @@ data "aws_security_group" "cluster" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "alb-allow-ip" {
-  security_group_id = data.aws_security_group.cluster.id
+  security_group_id            = data.aws_security_group.cluster.id
   referenced_security_group_id = aws_security_group.alb.id
-  ip_protocol = "tcp"
-  from_port   = 8080
-  to_port     = 8080
+  ip_protocol                  = "tcp"
+  from_port                    = 8080
+  to_port                      = 8080
 }
 
 resource "aws_vpc_security_group_ingress_rule" "alb-allow-instance" {
-  security_group_id = data.aws_security_group.cluster.id
+  security_group_id            = data.aws_security_group.cluster.id
   referenced_security_group_id = aws_security_group.alb.id
-  ip_protocol = "tcp"
-  from_port   = 30000
-  to_port     = 32767
+  ip_protocol                  = "tcp"
+  from_port                    = 30000
+  to_port                      = 32767
 }
 
 data "aws_ec2_managed_prefix_list" "cloudfront" {

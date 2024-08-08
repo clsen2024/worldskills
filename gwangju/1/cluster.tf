@@ -1,7 +1,8 @@
 resource "aws_eks_cluster" "main" {
-  name     = "wsi-eks-cluster"
-  role_arn = aws_iam_role.cluster.arn
-  version  = "1.29"
+  name                      = "skills-eks-cluster"
+  role_arn                  = aws_iam_role.cluster.arn
+  version                   = "1.29"
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   vpc_config {
     subnet_ids              = [aws_subnet.private-a.id, aws_subnet.private-b.id]
@@ -11,6 +12,12 @@ resource "aws_eks_cluster" "main" {
   }
   access_config {
     authentication_mode = "API_AND_CONFIG_MAP"
+  }
+  encryption_config {
+    provider {
+      key_arn = aws_kms_key.main.arn
+    }
+    resources = ["secrets"]
   }
 
   depends_on = [
@@ -55,20 +62,28 @@ resource "aws_eks_access_policy_association" "admin-allow" {
 }
 
 resource "aws_eks_addon" "kube-proxy" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "kube-proxy"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "kube-proxy"
 }
 
 resource "aws_eks_addon" "coredns" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "coredns"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "coredns"
 
-  depends_on = [aws_eks_node_group.addon]
+  depends_on = [aws_eks_fargate_profile.coredns]
 }
 
 resource "aws_eks_addon" "vpc-cni" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "vpc-cni"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "vpc-cni"
+}
+
+resource "aws_eks_addon" "cloudwatch" {
+  cluster_name         = aws_eks_cluster.main.name
+  addon_name           = "amazon-cloudwatch-observability"
+  configuration_values = "{\"containerLogs\": {\"enabled\": false}}"
+
+  depends_on = [aws_eks_node_group.addon, aws_eks_node_group.app]
 }
 
 resource "aws_security_group" "control-plane" {
