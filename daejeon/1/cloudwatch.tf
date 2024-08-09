@@ -8,7 +8,7 @@ data "template_file" "ap-dashboard" {
 
   vars = {
     cluster_name = aws_eks_cluster.ap.name
-    region = "ap-northeast-2"
+    region       = "ap-northeast-2"
   }
 }
 
@@ -22,6 +22,6 @@ data "template_file" "us-dashboard" {
 
   vars = {
     cluster_name = aws_eks_cluster.us.name
-    region = "us-east-1"
+    region       = "us-east-1"
   }
 }

@@ -130,10 +130,11 @@ resource "aws_security_group" "us-rds" {
 }
 
 resource "aws_dynamodb_table" "ap" {
-  name           = "order"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "id"
-  stream_enabled = true
+  name             = "order"
+  billing_mode     = "PAY_PER_REQUEST"
+  hash_key         = "id"
+  stream_enabled   = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
 
   attribute {
     name = "id"
