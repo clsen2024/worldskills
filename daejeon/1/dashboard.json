@@ -1,0 +1,27 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 10,
+      "height": 10,
+      "properties": {
+        "metrics": [
+          [
+            "ContainerInsights",
+            "cluster_node_count",
+            "ClusterName",
+            "${cluster_name}"
+          ]
+        ],
+        "sparkline": true,
+        "view": "singleValue",
+        "title": "Node Active summary",
+        "region": "${region}",
+        "stat": "Sum",
+        "period": 60
+      }
+    }
+  ]
+}

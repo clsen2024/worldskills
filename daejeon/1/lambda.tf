@@ -1,6 +1,6 @@
 data "archive_file" "lambda" {
   type        = "zip"
-  source_dir  = "function/lambda_edge"
+  source_file = "function/lambda_edge.py"
   output_path = "function/lambda_edge.zip"
 }
 
@@ -8,19 +8,19 @@ resource "aws_lambda_function" "edge" {
   provider = aws.us-east-1
 
   filename      = data.archive_file.lambda.output_path
-  function_name = "wsi-resizing-function"
+  function_name = "hrdkorea-healthcheck"
   role          = aws_iam_role.lambda.arn
-  handler       = "index.handler"
+  handler       = "lambda_edge.lambda_handler"
 
   timeout          = 10
   source_code_hash = data.archive_file.lambda.output_base64sha256
 
-  runtime = "nodejs20.x"
+  runtime = "python3.12"
   publish = true
 }
 
 resource "aws_iam_role" "lambda" {
-  name               = "ResizingFunctionRole"
+  name               = "LambdaEdgeRole"
   assume_role_policy = data.aws_iam_policy_document.lambda.json
 }
 
@@ -43,7 +43,7 @@ resource "aws_iam_role_policy_attachment" "logging" {
 }
 
 resource "aws_iam_policy" "lambda" {
-  name        = "ResizingFunctionPolicy"
+  name        = "LambdaEdgePolicy"
   path        = "/"
   description = "${aws_lambda_function.edge.function_name} IAM Policy"
 
@@ -56,8 +56,7 @@ resource "aws_iam_policy" "lambda" {
           "lambda:EnableReplication*",
           "lambda:DisableReplication*",
           "iam:CreateServiceLinkedRole",
-          "cloudfront:UpdateDistribution",
-          "s3:GetObject"
+          "cloudfront:UpdateDistribution"
         ]
         Effect   = "Allow"
         Resource = "*"

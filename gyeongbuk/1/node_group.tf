@@ -90,6 +90,8 @@ resource "aws_eks_fargate_profile" "app" {
       app = "order"
     }
   }
+
+  depends_on = [aws_iam_role_policy_attachment.fargate]
 }
 
 resource "aws_iam_role" "node" {
