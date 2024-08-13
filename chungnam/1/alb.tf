@@ -30,14 +30,6 @@ data "aws_security_group" "cluster" {
   id = aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "alb-allow-ip" {
-  security_group_id            = data.aws_security_group.cluster.id
-  referenced_security_group_id = aws_security_group.alb.id
-  ip_protocol                  = "tcp"
-  from_port                    = 8080
-  to_port                      = 8080
-}
-
 resource "aws_vpc_security_group_ingress_rule" "alb-allow-instance" {
   security_group_id            = data.aws_security_group.cluster.id
   referenced_security_group_id = aws_security_group.alb.id

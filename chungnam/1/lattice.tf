@@ -81,6 +81,8 @@ data "aws_network_interface" "alb" {
     name   = "subnet-id"
     values = [aws_subnet.prod-load-a.id]
   }
+
+  depends_on = [aws_alb.main]
 }
 
 resource "aws_vpclattice_target_group_attachment" "alb" {
