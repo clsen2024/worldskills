@@ -140,7 +140,7 @@ resource "aws_alb_target_group" "order" {
   name                 = "wsc2024-order-tg"
   port                 = "8080"
   protocol             = "HTTP"
-  target_type          = "ip"
+  target_type          = "instance"
   vpc_id               = aws_vpc.prod.id
   deregistration_delay = 60
 
