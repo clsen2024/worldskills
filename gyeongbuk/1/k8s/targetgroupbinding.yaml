@@ -1,0 +1,38 @@
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: customer
+  namespace: wsi
+spec:
+  nodeSelector:
+    matchLabels:
+      node: app
+  serviceRef:
+    name: customer-service
+    port: 8080
+  targetGroupARN: arn:aws:elasticloadbalancing:ap-northeast-2:073813292468:targetgroup/wsi-customer-tg/4c5d5de3b20c5500
+---
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: product
+  namespace: wsi
+spec:
+  nodeSelector:
+    matchLabels:
+      node: app
+  serviceRef:
+    name: product-service
+    port: 8080
+  targetGroupARN: arn:aws:elasticloadbalancing:ap-northeast-2:073813292468:targetgroup/wsi-product-tg/263dc4891d6d42d1
+---
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: order
+  namespace: wsi
+spec:
+  serviceRef:
+    name: order-service
+    port: 8080
+  targetGroupARN: arn:aws:elasticloadbalancing:ap-northeast-2:073813292468:targetgroup/wsi-order-tg/e69bcadec4265c45

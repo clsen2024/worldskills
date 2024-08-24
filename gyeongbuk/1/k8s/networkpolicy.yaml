@@ -1,0 +1,25 @@
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: customer
+  namespace: wsi
+spec:
+  selector: app == 'customer'
+  ingress:
+    - action: Deny
+      source:
+        selector: app == 'product'
+    - action: Allow
+---
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: product
+  namespace: wsi
+spec:
+  selector: app == 'product'
+  ingress:
+    - action: Deny
+      source:
+        selector: app == 'customer'
+    - action: Allow

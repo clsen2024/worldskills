@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer
+  namespace: wsi
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer
+  template:
+    metadata:
+      labels:
+        app: customer
+        access: db
+    spec:
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        node: app
+      tolerations:
+      - key: node
+        operator: Equal
+        value: app
+        effect: NoSchedule
+      containers:
+      - name: customer
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/customer
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        env:
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: dbcred
+                key: username
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: dbcred
+                key: password
+          - name: MYSQL_HOST
+            value: wsi-rds-mysql.cacgnhyyutg6.ap-northeast-2.rds.amazonaws.com
+          - name: MYSQL_PORT
+            value: "3310"
+          - name: MYSQL_DBNAME
+            value: wsi
+        ports:
+        - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product
+  namespace: wsi
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: product
+  template:
+    metadata:
+      labels:
+        app: product
+        access: db
+    spec:
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        node: app
+      tolerations:
+      - key: node
+        operator: Equal
+        value: app
+        effect: NoSchedule
+      containers:
+      - name: product
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/product
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        env:
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: dbcred
+                key: username
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: dbcred
+                key: password
+          - name: MYSQL_HOST
+            value: wsi-rds-mysql.cacgnhyyutg6.ap-northeast-2.rds.amazonaws.com
+          - name: MYSQL_PORT
+            value: "3310"
+          - name: MYSQL_DBNAME
+            value: wsi
+        ports:
+        - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+  namespace: wsi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      terminationGracePeriodSeconds: 60
+      serviceAccountName: access-dynamodb
+      containers:
+      - name: order
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/order
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        env:
+          - name: AWS_REGION
+            value: ap-northeast-2
+        ports:
+        - containerPort: 8080

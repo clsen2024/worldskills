@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer
+  namespace: wsi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer
+  template:
+    metadata:
+      labels:
+        app: customer
+    spec:
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        node: app
+      tolerations:
+      - key: node
+        operator: Equal
+        value: app
+        effect: NoSchedule
+      containers:
+      - name: customer
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/customer-ecr:latest
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        envFrom:
+        - secretRef:
+            name: customer
+        ports:
+        - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product
+  namespace: wsi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: product
+  template:
+    metadata:
+      labels:
+        app: product
+    spec:
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        node: app
+      tolerations:
+      - key: node
+        operator: Equal
+        value: app
+        effect: NoSchedule
+      containers:
+      - name: product
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/product-ecr:latest
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        envFrom:
+        - secretRef:
+            name: product
+        ports:
+        - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+  namespace: wsi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      serviceAccountName: access-dynamodb
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: order
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/order-ecr:latest
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        envFrom:
+        - secretRef:
+            name: order
+        ports:
+        - containerPort: 8080

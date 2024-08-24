@@ -1,0 +1,41 @@
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: customer
+  namespace: wsc2024
+spec:
+  nodeSelector:
+    matchLabels:
+      app: db
+  serviceRef:
+    name: customer-service
+    port: 8080
+  targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:073813292468:targetgroup/wsc2024-customer-tg/39400826c84af6c3
+---
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: product
+  namespace: wsc2024
+spec:
+  nodeSelector:
+    matchLabels:
+      app: db
+  serviceRef:
+    name: product-service
+    port: 8080
+  targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:073813292468:targetgroup/wsc2024-product-tg/b146c51ae5fb683a
+---
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: order
+  namespace: wsc2024
+spec:
+  nodeSelector:
+    matchLabels:
+      app: db
+  serviceRef:
+    name: order-service
+    port: 8080
+  targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:073813292468:targetgroup/wsc2024-order-tg/b2e2fbf7642fae85

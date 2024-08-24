@@ -1,0 +1,13 @@
+apiVersion: vpcresources.k8s.aws/v1beta1
+kind: SecurityGroupPolicy
+metadata:
+  name: wsi-sg-policy
+  namespace: wsi
+spec:
+  podSelector:
+    matchLabels:
+      access: db
+  securityGroups:
+    groupIds:
+      - sg-06944bae186b7c86f
+      - sg-0b21b152efd0a9be4

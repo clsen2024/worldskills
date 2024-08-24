@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-deploy
+  namespace: wsc2024
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer
+  template:
+    metadata:
+      labels:
+        app: customer
+    spec:
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        app: db
+      tolerations:
+      - key: app
+        operator: Equal
+        value: db
+        effect: NoSchedule
+      containers:
+      - name: customer
+        image: 073813292468.dkr.ecr.us-east-1.amazonaws.com/customer-repo
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        envFrom:
+        - secretRef:
+            name: dbcred
+        ports:
+        - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-deploy
+  namespace: wsc2024
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: product
+  template:
+    metadata:
+      labels:
+        app: product
+    spec:
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        app: db
+      tolerations:
+      - key: app
+        operator: Equal
+        value: db
+        effect: NoSchedule
+      containers:
+      - name: product
+        image: 073813292468.dkr.ecr.us-east-1.amazonaws.com/product-repo
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        envFrom:
+        - secretRef:
+            name: dbcred
+        ports:
+        - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-deploy
+  namespace: wsc2024
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      serviceAccountName: access-dynamodb
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        app: db
+      tolerations:
+      - key: app
+        operator: Equal
+        value: db
+        effect: NoSchedule
+      containers:
+      - name: order
+        image: 073813292468.dkr.ecr.us-east-1.amazonaws.com/order-repo
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        envFrom:
+        - secretRef:
+            name: order
+        ports:
+        - containerPort: 8080
