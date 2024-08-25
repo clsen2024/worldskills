@@ -1,5 +1,5 @@
 resource "aws_vpc" "main" {
-  cidr_block           = "10.20.0.0/16"
+  cidr_block           = "10.90.0.0/16"
   enable_dns_hostnames = true
 
   tags = {
@@ -9,7 +9,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "public-a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.20.10.0/24"
+  cidr_block              = "10.90.10.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "ap-northeast-2a"
 
@@ -20,7 +20,7 @@ resource "aws_subnet" "public-a" {
 
 resource "aws_subnet" "public-b" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.20.11.0/24"
+  cidr_block              = "10.90.11.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "ap-northeast-2b"
 
@@ -31,7 +31,7 @@ resource "aws_subnet" "public-b" {
 
 resource "aws_subnet" "private-a" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.20.0.0/24"
+  cidr_block        = "10.90.0.0/24"
   availability_zone = "ap-northeast-2a"
 
   tags = {
@@ -41,7 +41,7 @@ resource "aws_subnet" "private-a" {
 
 resource "aws_subnet" "private-b" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.20.1.0/24"
+  cidr_block        = "10.90.1.0/24"
   availability_zone = "ap-northeast-2b"
 
   tags = {

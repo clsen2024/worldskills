@@ -1,51 +1,51 @@
 resource "aws_vpc" "main" {
-  cidr_block           = "10.20.0.0/16"
+  cidr_block           = "10.120.0.0/16"
   enable_dns_hostnames = true
 
   tags = {
-    Name = "wsi-vpc"
+    Name = "gwangju-3-vpc"
   }
 }
 
 resource "aws_subnet" "public-a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.20.10.0/24"
+  cidr_block              = "10.120.10.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "ap-northeast-2a"
 
   tags = {
-    Name = "wsi-public-a"
+    Name = "gwangju-3-public-a"
   }
 }
 
 resource "aws_subnet" "public-b" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.20.11.0/24"
+  cidr_block              = "10.120.11.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "ap-northeast-2b"
 
   tags = {
-    Name = "wsi-public-b"
+    Name = "gwangju-3-public-b"
   }
 }
 
 resource "aws_subnet" "private-a" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.20.0.0/24"
+  cidr_block        = "10.120.0.0/24"
   availability_zone = "ap-northeast-2a"
 
   tags = {
-    Name = "wsi-app-a"
+    Name = "gwangju-3-app-a"
   }
 }
 
 resource "aws_subnet" "private-b" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.20.1.0/24"
+  cidr_block        = "10.120.1.0/24"
   availability_zone = "ap-northeast-2b"
 
   tags = {
-    Name = "wsi-app-b"
+    Name = "gwangju-3-app-b"
   }
 }
 
@@ -53,7 +53,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "wsi-igw"
+    Name = "gwangju-3-igw"
   }
 }
 
@@ -61,7 +61,7 @@ resource "aws_eip" "eip-a" {
   domain = "vpc"
 
   tags = {
-    Name = "wsi-eip-a"
+    Name = "gwangju-3-eip-a"
   }
 }
 
@@ -69,7 +69,7 @@ resource "aws_eip" "eip-b" {
   domain = "vpc"
 
   tags = {
-    Name = "wsi-eip-b"
+    Name = "gwangju-3-eip-b"
   }
 }
 
@@ -78,7 +78,7 @@ resource "aws_nat_gateway" "nat-a" {
   subnet_id     = aws_subnet.public-a.id
 
   tags = {
-    Name = "wsi-natgw-a"
+    Name = "gwangju-3-natgw-a"
   }
 
   depends_on = [aws_internet_gateway.igw]
@@ -89,7 +89,7 @@ resource "aws_nat_gateway" "nat-b" {
   subnet_id     = aws_subnet.public-b.id
 
   tags = {
-    Name = "wsi-natgw-b"
+    Name = "gwangju-3-natgw-b"
   }
 
   depends_on = [aws_internet_gateway.igw]
@@ -104,7 +104,7 @@ resource "aws_route_table" "public-rt" {
   }
 
   tags = {
-    Name = "wsi-public-rt"
+    Name = "gwangju-3-public-rt"
   }
 }
 
@@ -117,7 +117,7 @@ resource "aws_route_table" "private-a-rt" {
   }
 
   tags = {
-    Name = "wsi-app-a-rt"
+    Name = "gwangju-3-app-a-rt"
   }
 }
 
@@ -130,7 +130,7 @@ resource "aws_route_table" "private-b-rt" {
   }
 
   tags = {
-    Name = "wsi-app-b-rt"
+    Name = "gwangju-3-app-b-rt"
   }
 }
 

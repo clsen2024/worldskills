@@ -55,20 +55,20 @@ resource "aws_eks_access_policy_association" "admin-allow" {
 }
 
 resource "aws_eks_addon" "kube-proxy" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "kube-proxy"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "kube-proxy"
 }
 
 resource "aws_eks_addon" "coredns" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "coredns"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "coredns"
 
   depends_on = [aws_eks_node_group.app]
 }
 
 resource "aws_eks_addon" "vpc-cni" {
-  cluster_name                = aws_eks_cluster.main.name
-  addon_name                  = "vpc-cni"
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "vpc-cni"
 }
 
 resource "aws_security_group" "control-plane" {

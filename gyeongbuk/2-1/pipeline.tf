@@ -1,6 +1,6 @@
 resource "aws_codecommit_repository" "main" {
   repository_name = "wsi-commit"
-  default_branch = "main"
+  default_branch  = "main"
 }
 
 data "aws_iam_policy_document" "codebuild_assume" {

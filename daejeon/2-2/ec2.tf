@@ -2,6 +2,7 @@ resource "aws_instance" "test" {
   ami                         = data.aws_ami.amazon-linux-2023.id
   associate_public_ip_address = true
   instance_type               = "t2.micro"
+  subnet_id                   = data.aws_subnet.public-a.id
 
   tags = {
     Name = "wsi-app-ec2"

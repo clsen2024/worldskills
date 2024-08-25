@@ -3,6 +3,7 @@ resource "aws_instance" "app" {
   associate_public_ip_address = true
   instance_type               = "t3.small"
   key_name                    = data.aws_key_pair.wsi.key_name
+  subnet_id                   = aws_subnet.public-a.id
   vpc_security_group_ids      = [aws_security_group.app.id]
   iam_instance_profile        = aws_iam_instance_profile.app.name
   user_data                   = file("./user_data.sh")
@@ -32,14 +33,10 @@ data "aws_ami" "al2023" {
   }
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
 resource "aws_security_group" "app" {
   name        = "wsi-server-sg"
   description = "Allow SSH traffic"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port        = 80

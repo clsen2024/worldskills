@@ -1,51 +1,51 @@
 resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block           = "10.140.0.0/16"
   enable_dns_hostnames = true
 
   tags = {
-    Name = "wsi-vpc"
+    Name = "gyeongbuk-2-vpc"
   }
 }
 
 resource "aws_subnet" "public-a" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.0.0/24"
+  cidr_block              = "10.140.0.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "ap-northeast-2a"
 
   tags = {
-    Name = "wsi-public-subnet-a"
+    Name = "gyeongbuk-2-public-subnet-a"
   }
 }
 
 resource "aws_subnet" "public-b" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
+  cidr_block              = "10.140.1.0/24"
   map_public_ip_on_launch = true
   availability_zone       = "ap-northeast-2b"
 
   tags = {
-    Name = "wsi-public-subnet-b"
+    Name = "gyeongbuk-2-public-subnet-b"
   }
 }
 
 resource "aws_subnet" "private-a" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
+  cidr_block        = "10.140.2.0/24"
   availability_zone = "ap-northeast-2a"
 
   tags = {
-    Name = "wsi-private-subnet-a"
+    Name = "gyeongbuk-2-private-subnet-a"
   }
 }
 
 resource "aws_subnet" "private-b" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.3.0/24"
+  cidr_block        = "10.140.3.0/24"
   availability_zone = "ap-northeast-2b"
 
   tags = {
-    Name = "wsi-private-subnet-b"
+    Name = "gyeongbuk-2-private-subnet-b"
   }
 }
 
@@ -53,7 +53,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "wsi-igw"
+    Name = "gyeongbuk-2-igw"
   }
 }
 
@@ -61,7 +61,7 @@ resource "aws_eip" "eip-a" {
   domain = "vpc"
 
   tags = {
-    Name = "wsi-eip-a"
+    Name = "gyeongbuk-2-eip-a"
   }
 }
 
@@ -69,7 +69,7 @@ resource "aws_eip" "eip-b" {
   domain = "vpc"
 
   tags = {
-    Name = "wsi-eip-b"
+    Name = "gyeongbuk-2-eip-b"
   }
 }
 
@@ -78,7 +78,7 @@ resource "aws_nat_gateway" "nat-a" {
   subnet_id     = aws_subnet.public-a.id
 
   tags = {
-    Name = "wsi-natgw-a"
+    Name = "gyeongbuk-2-natgw-a"
   }
 
   depends_on = [aws_internet_gateway.igw]
@@ -89,7 +89,7 @@ resource "aws_nat_gateway" "nat-b" {
   subnet_id     = aws_subnet.public-b.id
 
   tags = {
-    Name = "wsi-natgw-b"
+    Name = "gyeongbuk-2-natgw-b"
   }
 
   depends_on = [aws_internet_gateway.igw]
@@ -104,7 +104,7 @@ resource "aws_route_table" "public-rt" {
   }
 
   tags = {
-    Name = "wsi-public-rtb"
+    Name = "gyeongbuk-2-public-rtb"
   }
 }
 
@@ -117,7 +117,7 @@ resource "aws_route_table" "private-a-rt" {
   }
 
   tags = {
-    Name = "wsi-private-rtb-a"
+    Name = "gyeongbuk-2-private-rtb-a"
   }
 }
 
@@ -130,7 +130,7 @@ resource "aws_route_table" "private-b-rt" {
   }
 
   tags = {
-    Name = "wsi-private-rtb-b"
+    Name = "gyeongbuk-2-private-rtb-b"
   }
 }
 
