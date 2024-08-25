@@ -1,7 +1,7 @@
 resource "aws_instance" "bastion" {
-  ami                         = data.aws_ami.al2023-arm.id
+  ami                         = data.aws_ami.al2023.id
   associate_public_ip_address = true
-  instance_type               = "t4g.small"
+  instance_type               = "t3.small"
   subnet_id                   = aws_subnet.public-a.id
   disable_api_termination     = true
   key_name                    = data.aws_key_pair.wsi.key_name
@@ -9,11 +9,11 @@ resource "aws_instance" "bastion" {
   iam_instance_profile        = aws_iam_instance_profile.poweruser.name
 
   tags = {
-    Name = "wsi-bastion"
+    Name = "gyeongbuk-2-bastion"
   }
 }
 
-data "aws_ami" "al2023-64" {
+data "aws_ami" "al2023" {
   most_recent = true
   owners      = ["amazon"]
 
@@ -33,37 +33,8 @@ data "aws_ami" "al2023-64" {
   }
 }
 
-data "aws_ami" "al2023-arm" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-2023.*-arm64"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["arm64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
-resource "aws_eip" "bastion" {
-  domain   = "vpc"
-  instance = aws_instance.bastion.id
-
-  tags = {
-    Name = "wsi-eip-bastion"
-  }
-}
-
 resource "aws_security_group" "bastion" {
-  name        = "wsi-sg-bastion"
+  name        = "gyeongbuk-2-bastion-sg"
   description = "Allow SSH traffic"
   vpc_id      = aws_vpc.main.id
 
@@ -119,8 +90,8 @@ resource "aws_iam_instance_profile" "poweruser" {
 
 resource "aws_launch_template" "app" {
   name                   = "app_instance"
-  image_id               = data.aws_ami.al2023-64.id
-  instance_type          = "t3.medium"
+  image_id               = data.aws_ami.al2023.id
+  instance_type          = "t3.small"
   key_name               = data.aws_key_pair.wsi.key_name
   user_data              = base64encode(data.template_file.user_data.rendered)
   vpc_security_group_ids = [aws_security_group.app.id]

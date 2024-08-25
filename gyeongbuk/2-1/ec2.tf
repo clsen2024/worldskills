@@ -9,7 +9,7 @@ resource "aws_instance" "bastion" {
   iam_instance_profile        = aws_iam_instance_profile.admin.name
 
   tags = {
-    Name = "wsi-bastion"
+    Name = "gyeongbuk-1-bastion"
   }
 }
 
@@ -54,7 +54,7 @@ data "aws_ami" "ecs" {
 }
 
 resource "aws_security_group" "bastion" {
-  name        = "bastion-sg"
+  name        = "gyeongbuk-1-bastion-sg"
   description = "Allow SSH traffic"
   vpc_id      = aws_vpc.main.id
 
@@ -80,7 +80,7 @@ data "aws_key_pair" "wsi" {
 }
 
 resource "aws_iam_role" "admin" {
-  name               = "wsi-bastion-role"
+  name               = "gyeongbuk-1-bastion-role"
   assume_role_policy = data.aws_iam_policy_document.ec2.json
 }
 

@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "main" {
-  name         = "wsi"
+  name         = "gyeongbuk-1"
   force_delete = true
 }
 

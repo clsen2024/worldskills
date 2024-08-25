@@ -33,15 +33,6 @@ data "aws_ami" "al2023" {
   }
 }
 
-resource "aws_eip" "bastion" {
-  domain   = "vpc"
-  instance = aws_instance.bastion.id
-
-  tags = {
-    Name = "wsi-eip-bastion"
-  }
-}
-
 resource "aws_security_group" "bastion" {
   name        = "wsi-bastion-sg"
   description = "Allow SSH traffic"
