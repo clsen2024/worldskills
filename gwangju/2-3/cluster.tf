@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "cluster" {
 }
 
 resource "aws_iam_role" "cluster" {
-  name               = "eksClusterRole"
+  name               = "eksClusterRole-gwangju-3"
   assume_role_policy = data.aws_iam_policy_document.cluster.json
 }
 

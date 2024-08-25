@@ -32,7 +32,7 @@ resource "aws_eks_node_group" "app" {
 }
 
 resource "aws_iam_role" "node" {
-  name               = "AmazonEKSNodeRole"
+  name               = "AmazonEKSNodeRole-gwangju-2"
   assume_role_policy = data.aws_iam_policy_document.ec2.json
 }
 
