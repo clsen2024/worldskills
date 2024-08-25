@@ -18,6 +18,17 @@ resource "aws_subnet" "public-a" {
   }
 }
 
+resource "aws_subnet" "public-b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.140.1.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "ap-northeast-2b"
+
+  tags = {
+    Name = "gyeongbuk-2-public-b"
+  }
+}
+
 resource "aws_subnet" "private-a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.140.2.0/24"
@@ -25,6 +36,16 @@ resource "aws_subnet" "private-a" {
 
   tags = {
     Name = "gyeongbuk-2-private-a"
+  }
+}
+
+resource "aws_subnet" "private-b" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.140.3.0/24"
+  availability_zone = "ap-northeast-2b"
+
+  tags = {
+    Name = "gyeongbuk-2-private-b"
   }
 }
 
@@ -86,7 +107,17 @@ resource "aws_route_table_association" "public-a-join" {
   route_table_id = aws_route_table.public-rt.id
 }
 
+resource "aws_route_table_association" "public-b-join" {
+  subnet_id      = aws_subnet.public-b.id
+  route_table_id = aws_route_table.public-rt.id
+}
+
 resource "aws_route_table_association" "private-a-join" {
   subnet_id      = aws_subnet.private-a.id
+  route_table_id = aws_route_table.private-rt.id
+}
+
+resource "aws_route_table_association" "private-b-join" {
+  subnet_id      = aws_subnet.private-b.id
   route_table_id = aws_route_table.private-rt.id
 }

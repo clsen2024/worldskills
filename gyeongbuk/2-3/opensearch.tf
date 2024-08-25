@@ -64,7 +64,7 @@ data "aws_iam_policy_document" "opensearch" {
 resource "opensearch_roles_mapping" "app" {
   role_name     = "all_access"
   users         = ["admin", local.caller_arn]
-  backend_roles = [module.fluent-bit.iam_role_arn]
+  backend_roles = [aws_iam_role.app.arn]
 
   lifecycle {
     prevent_destroy = true

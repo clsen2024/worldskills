@@ -36,7 +36,7 @@ data "aws_ami" "al2023" {
 resource "aws_security_group" "app" {
   name        = "wsi-server-sg"
   description = "Allow SSH traffic"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = data.aws_vpc.main.id
 
   ingress {
     from_port        = 80
