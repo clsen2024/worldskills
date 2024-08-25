@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: app
+data:
+  fluent-bit.conf: |-
+    [SERVICE]
+        Flush             5
+        Grace             30
+        Log_Level         info
+        Daemon            off
+        HTTP_Server       Off
+        
+    [INPUT]
+        Name              tail
+        Tag               ${POD_NAME}
+        Path              /log/app.log
+        Refresh_Interval  10
+        
+    [OUTPUT]
+        Name              forward
+        Match             *
+        Host              fluentd.fluentd
+        Port              24224
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: fluentd
+data:
+  fluent.conf: |-
+    <source>
+      @type forward
+      bind 0.0.0.0
+      port 24224
+    </source>
+    
+    <match service-a-**>
+      @type cloudwatch_logs
+      region ap-northeast-2
+      log_group_name /gwangju/eks/application/logs
+      log_stream_name service-a-logs
+      auto_create_stream true
+      <buffer>
+        flush_interval 5
+      </buffer>
+    </match>
+
+    <match service-b-**>
+      @type cloudwatch_logs
+      region ap-northeast-2
+      log_group_name /gwangju/eks/application/logs
+      log_stream_name service-b-logs
+      auto_create_stream true
+      <buffer>
+        flush_interval 5
+      </buffer>
+    </match>
+
+    <match service-c-**>
+      @type cloudwatch_logs
+      region ap-northeast-2
+      log_group_name /gwangju/eks/application/logs
+      log_stream_name service-c-logs
+      auto_create_stream true
+      <buffer>
+        flush_interval 5
+      </buffer>
+    </match>

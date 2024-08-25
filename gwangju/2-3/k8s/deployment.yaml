@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-a
+  namespace: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: a
+  template:
+    metadata:
+      labels:
+        service: a
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: service-a
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/service-a
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - name: log-volume
+            mountPath: /log
+      - name: default-fluentbit
+        image: fluent/fluent-bit:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        volumeMounts:
+          - name: config-volume
+            mountPath: /fluent-bit/etc/
+          - name: log-volume
+            mountPath: /log
+      volumes:
+        - name: log-volume
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: fluent-bit-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-b
+  namespace: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: b
+  template:
+    metadata:
+      labels:
+        service: b
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: service-b
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/service-b
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - name: log-volume
+            mountPath: /log
+      - name: default-fluentbit
+        image: fluent/fluent-bit:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        volumeMounts:
+          - name: config-volume
+            mountPath: /fluent-bit/etc/
+          - name: log-volume
+            mountPath: /log
+      volumes:
+        - name: log-volume
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: fluent-bit-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-c
+  namespace: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: c
+  template:
+    metadata:
+      labels:
+        service: c
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: service-c
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/service-c
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - name: log-volume
+            mountPath: /log
+      - name: default-fluentbit
+        image: fluent/fluent-bit:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        volumeMounts:
+          - name: config-volume
+            mountPath: /fluent-bit/etc/
+          - name: log-volume
+            mountPath: /log
+      volumes:
+        - name: log-volume
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: fluent-bit-config

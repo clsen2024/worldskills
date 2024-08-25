@@ -1,5 +1,5 @@
 resource "aws_eks_cluster" "main" {
-  name     = "wsi-eks-cluster"
+  name     = "gwangju-2-cluster"
   role_arn = aws_iam_role.cluster.arn
   version  = "1.29"
 

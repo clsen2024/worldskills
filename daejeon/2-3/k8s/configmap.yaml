@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: wsi-ns
+data:
+  fluent-bit.conf: |-
+    [SERVICE]
+        HTTP_Server       On
+        HTTP_Listen       0.0.0.0
+        HTTP_PORT         2020
+        Flush             5
+        Daemon            Off
+        Log_Level         error
+        Parsers_File      parsers.conf
+
+    [INPUT]
+        Name              tail
+        Tag               app
+        Path              /logs/app.log
+        Parser            app
+
+    [OUTPUT]
+        Name              cloudwatch
+        Match             app
+        region            ap-northeast-2
+        log_group_name    /wsi/eks/log/
+        log_stream_name   log-${POD_NAME}
+        auto_create_group true
+
+  parsers.conf: |-
+    [PARSER]
+        Name              app
+        Format            regex
+        Regex             ^(?<year>[^-]*)-(?<month>[^-]*)-(?<day>[^ ]*) (?<hour>[^:]*):(?<minute>[^:]*):(?<second>[^,]*),[^ ]* - - (?<ip>[^ ]*) (?<port>[^ ]*) (?<method>[^ ]*) (?<path>[^ ]*) (?<statuscode>[^ ]*)

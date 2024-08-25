@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wsi-dpm
+  namespace: wsi-ns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wsi
+  template:
+    metadata:
+      labels:
+        app: wsi
+    spec:
+      terminationGracePeriodSeconds: 60
+      serviceAccountName: fluent-bit
+      containers:
+      - name: wsi-cnt
+        image: 073813292468.dkr.ecr.ap-northeast-2.amazonaws.com/wsi-app:latest
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - name: log-volume
+            mountPath: /logs
+      - name: fluent-bit-cnt
+        image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
+        resources:
+          requests:
+            cpu: 500m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 200Mi
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        ports:
+          - name: metrics
+            containerPort: 2020
+            protocol: TCP
+        volumeMounts:
+          - name: config-volume
+            mountPath: /fluent-bit/etc/
+          - name: log-volume
+            mountPath: /logs
+      volumes:
+        - name: log-volume
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: fluent-bit-config
